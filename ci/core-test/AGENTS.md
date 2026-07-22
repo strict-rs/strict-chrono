@@ -1,3 +1,5 @@
+<!-- Do not edit; generated file. -->
+
 # ci/core-test — `#![no_std]` compile-smoke crate
 
 `core-test` (edition 2018) is a tiny standalone crate whose only job is to fail the build if chrono ever accidentally pulls in `std` on a `no_std` target. It path-depends on `chrono` with `default-features = false, features = ["serde"]`, and exposes an `alloc` feature that forwards to `chrono/alloc`.

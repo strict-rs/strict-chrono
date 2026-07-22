@@ -12,8 +12,7 @@ branch = "main"
 order = ["cargo"]
 
 [ecosystems.cargo.layout]
-kind           = "members-dir"
-members-dir    = "crates"
+kind = "flat"
 
 [ecosystems.cargo.update]
 lockfile-refresh = "when-managed-dependencies-change"
@@ -788,7 +787,7 @@ code-quality   = ["dupes.toml", ".jscpd.json"]
 toolchain      = ["rust-toolchain.toml"]
 github         = [".github/dependabot.yml", ".github/workflows/ci.yml", ".github/workflows/scheduled.yml"]
 automation     = ["justfile"]
-guidance       = ["AGENTS.md", "README.md", "crates/AGENTS.md", "xtask/AGENTS.md"]
+guidance       = ["AGENTS.md", "README.md", "xtask/AGENTS.md"]
 repository     = [".gitattributes", ".gitmodules", "LICENSE"]
 
 [[gates.rules]]

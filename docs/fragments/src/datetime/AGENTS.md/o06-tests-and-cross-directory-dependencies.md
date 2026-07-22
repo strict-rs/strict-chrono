@@ -1,0 +1,5 @@
+## Tests and cross-directory dependencies
+
+`tests.rs` and the `#[cfg(test)]` module inside `serde.rs` are **upstream-style**: they use `assert!`/`assert_eq!`/`unwrap()`/`#[should_panic]` and a few local `#[allow(...)]`s, and are deliberately not converted to the strict `Result<(), TestFailure>` + `ensure*` vocabulary — keep that style so upstream merges stay clean. `DstTester` (a synthetic +9/+8 DST `TimeZone` with ambiguous/none windows) is the main fixture for exercising DST behavior in `Days`/`Months` arithmetic.
+
+This directory consumes the other three: UTC storage and offset/arithmetic math bottom out in `../naive` (`NaiveDateTime::{MIN, MAX, checked_add_offset, overflowing_add_offset, …}`); timezone resolution comes from `../offset` (`TimeZone`, `Offset::fix`, `LocalResult`); formatting and parsing delegate to `../format` (`Parsed`, `parse*`, `write_rfc2822`/`write_rfc3339`, `DelayedFormat`, `StrftimeItems`). See those directories' `AGENTS.md` for their internals rather than duplicating them here.

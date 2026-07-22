@@ -1,3 +1,5 @@
+<!-- Do not edit; generated file. -->
+
 # fuzz — cargo-fuzz / libFuzzer targets
 
 `chrono-fuzz` (edition 2018, version `0.0.0`, `publish = false`) is a cargo-fuzz crate that path-depends on `chrono` and on `libfuzzer-sys`. It declares its own `[workspace] members = ["."]` so it detaches from the parent crate and does not get pulled into any surrounding build.

@@ -1,0 +1,3 @@
+## `MappedLocalTime` is the core abstraction
+
+Converting a local (wall-clock) `NaiveDateTime` to an instant can have three outcomes, modelled by `MappedLocalTime<T>` (the older name `LocalResult<T>` is a type alias): `Single(t)`, `Ambiguous(earliest, latest)` (a *fold* — the hour that repeats when clocks go back), and `None` (a *gap* — the skipped hour when clocks go forward). Every local-time constructor funnels through it, and callers pick a result with `.single()` / `.earliest()` / `.latest()` / `.unwrap()`. `None` is also returned on any resolution error (missing tz data, OS error, overflow). Note the documented wasm caveat: under `Local` on wasm, only `Single` is ever produced.

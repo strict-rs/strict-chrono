@@ -1,0 +1,3 @@
+## Leap seconds live in `NaiveTime`
+
+`NaiveTime { secs: u32, frac: u32 }` stores seconds-from-midnight (`0..86_400`) and a nanosecond `frac`. A leap second is `frac >= 1_000_000_000`, accepted only when `secs % 60 == 59`; `frac` may reach `2_000_000_000`. `second()` returns 59 during a leap second (formatting reconstructs `60`). Arithmetic wraps within a day and *ignores* whole days: `overflowing_add_signed`/`overflowing_sub_signed` return `(NaiveTime, i64)` where the `i64` is the day-carry in seconds, and `overflowing_add/sub_offset` return `(NaiveTime, i32)` day-carry — this is how `NaiveDateTime` and `DateTime` push the carry into the date while preserving leap seconds.

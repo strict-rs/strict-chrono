@@ -1,0 +1,3 @@
+## Conventions and one strict-vs-upstream tension
+
+Tests across `date/`, `time/`, `datetime/` are upstream-style (`assert!`/`unwrap()`), and `internals.rs` / `date/tests.rs` pin the bit-packing against the 14-entry `YEAR_FLAGS` dominical-letter table — preserve that shape. One thing to flag for any strict-policy conversion: `NaiveDate::from_yof` uses `unsafe { NonZeroI32::new_unchecked(yof) }`. `unsafe` is forbidden workspace-wide in the strict family, so removing it means refactoring the constructor (e.g. a checked `NonZeroI32::new`), not adding an allowance. (The platform `../offset/local` code also contains `unsafe` for FFI and zero-copy string views.)

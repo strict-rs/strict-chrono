@@ -5,7 +5,8 @@ authors = [
   "Kang Seonghoon <public+rust@mearie.org>",
   "Brandon W Maister <quodlibetor@gmail.com>",
 ]
-edition = "2018"
+edition = "2024"
+rust-version = "1.97"
 
 [dependencies]
 chrono = { path = "../..", default-features = false, features = ["serde"] }

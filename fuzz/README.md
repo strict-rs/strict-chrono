@@ -1,3 +1,5 @@
+<!-- Do not edit; generated file. -->
+
 # Fuzzing Chrono
 To fuzz Chrono we rely on the [Cargo-fuzz](https://rust-fuzz.github.io/) project. 
 

@@ -10,8 +10,8 @@ categories = ["date-and-time"]
 readme = "README.md"
 license = "MIT OR Apache-2.0"
 include = ["src/*", "tests/*.rs", "LICENSE.txt", "CITATION.cff"]
-edition = "2021"
-rust-version = "1.62.0"
+edition = "2024"
+rust-version = "1.97"
 
 [lib]
 name = "chrono"
@@ -73,3 +73,38 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [package.metadata.playground]
 features = ["serde"]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Workspace (upgrade stage)
+# ─────────────────────────────────────────────────────────────────────────────
+# The `chrono` package above is the workspace root. Only `xtask` is a member and
+# inherits the shared `[workspace.package]` metadata (edition 2024, rust-version
+# 1.97). The upstream chrono helper crates (`bench`, `fuzz`, `ci/core-test`) stay
+# out of the workspace via `exclude`, keeping their own editions and remaining
+# mergeable with `chronotope/chrono`. Strict lint policy, profiles, and patches
+# are intentionally deferred to the later strict stage.
+# ─────────────────────────────────────────────────────────────────────────────
+
+[workspace]
+members  = ["xtask"]
+exclude  = ["bench", "fuzz", "ci/core-test"]
+resolver = "3"
+
+[workspace.package]
+version      = "0.4.45"
+edition      = "2024"
+rust-version = "1.97"
+license-file = "LICENSE.txt"
+publish      = false
+authors      = [
+  "Kang Seonghoon <public+rust@mearie.org>",
+  "Brandon W Maister <quodlibetor@gmail.com>",
+  "Takumi Shimada <hello@takumi.earth>",
+]
+repository   = "https://github.com/strict-rs/strict-chrono"
+readme       = "README.md"
+
+[workspace.dependencies]
+template-core = { version = "0.1.0", path = "../template-rs/crates/template-core" }
+template-xtask = { version = "0.1.0", path = "../template-rs/crates/template-xtask" }
+strict-test-support = { version = "0.1.0", path = "../strict-test-support-rs/crates/strict-test-support" }

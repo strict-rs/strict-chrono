@@ -1,0 +1,3 @@
+## What this repository is
+
+`strict-chrono` (remote `github.com/strict-rs/strict-chrono`) is a hard fork of upstream [`chronotope/chrono`](https://github.com/chronotope/chrono). The crate is still named and published as `chrono` (`Cargo.toml` `name = "chrono"`, `[lib] name = "chrono"`, version tracks upstream — currently `0.4.45`). It provides timezone-aware date and time handling on the proleptic Gregorian calendar: `DateTime<Tz>` is timezone-aware by default with separate timezone-naive types, operations that can produce an invalid or ambiguous result return `Option` or `MappedLocalTime`, and parsing/formatting uses an `strftime`-inspired syntax. Timezone data is not bundled; `Local` reads the OS timezone.
