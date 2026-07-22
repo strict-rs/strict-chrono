@@ -1,6 +1,39 @@
-target
-Cargo.lock
+# Cargo / rust
+/target/
+**/*.rs.bk
+**/*.rmeta
+**/target/
+/*.rlib
 .tool-versions
 
-# for jetbrains users
+# Coverage reports (written by `template coverage`)
+cov/
+/report/
+
+# Code metrics (written by `template cq`)
+/metrics/
+
+# Mutation testing output (written by `template mutants`)
+/mutants.out/
+/mutants.out.old/
+
+# Rustfmt backup
+**/*.bk
+
+# Intentionally do not lock
+Cargo.lock
+
+# Editor / IDE
 .idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+*~
+
+# Env overrides
+.envrc
+.direnv/

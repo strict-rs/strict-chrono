@@ -36,12 +36,12 @@
 //!
 //! - `serde`: Enable serialization/deserialization via [serde].
 //! - `rkyv`: Deprecated, use the `rkyv-*` features.
-//! - `rkyv-16`: Enable serialization/deserialization via [rkyv],
-//!   using 16-bit integers for integral `*size` types.
-//! - `rkyv-32`: Enable serialization/deserialization via [rkyv],
-//!   using 32-bit integers for integral `*size` types.
-//! - `rkyv-64`: Enable serialization/deserialization via [rkyv],
-//!   using 64-bit integers for integral `*size` types.
+//! - `rkyv-16`: Enable serialization/deserialization via [rkyv], using 16-bit integers for integral
+//!   `*size` types.
+//! - `rkyv-32`: Enable serialization/deserialization via [rkyv], using 32-bit integers for integral
+//!   `*size` types.
+//! - `rkyv-64`: Enable serialization/deserialization via [rkyv], using 64-bit integers for integral
+//!   `*size` types.
 //! - `rkyv-validation`: Enable rkyv validation support using `bytecheck`.
 //! - `arbitrary`: Construct arbitrary instances of a type with the Arbitrary crate.
 //! - `unstable-locales`: Enable localization. This adds various methods with a `_localized` suffix.
@@ -90,10 +90,10 @@
 //!
 //! * [`Local`] specifies the system local time zone.
 //!
-//! * [`FixedOffset`] specifies an arbitrary, fixed time zone such as UTC+09:00 or UTC-10:30.
-//!   This often results from the parsed textual date and time. Since it stores the most information
-//!   and does not depend on the system environment, you would want to normalize other `TimeZone`s
-//!   into this type.
+//! * [`FixedOffset`] specifies an arbitrary, fixed time zone such as UTC+09:00 or UTC-10:30. This
+//!   often results from the parsed textual date and time. Since it stores the most information and
+//!   does not depend on the system environment, you would want to normalize other `TimeZone`s into
+//!   this type.
 //!
 //! [`DateTime`]s with different [`TimeZone`] types are distinct and do not mix, but can be
 //! converted to each other using the [`DateTime::with_timezone`] method.
@@ -106,6 +106,7 @@
 //! use chrono::prelude::*;
 //!
 //! let utc: DateTime<Utc> = Utc::now(); // e.g. `2014-11-28T12:45:59.324310806Z`
+//! //
 //! # let _ = utc;
 //! # }
 //! ```
@@ -115,6 +116,7 @@
 //! use chrono::prelude::*;
 //!
 //! let local: DateTime<Local> = Local::now(); // e.g. `2014-11-28T21:45:59.324310806+09:00`
+//! //
 //! # let _ = local;
 //! # }
 //! ```
@@ -202,19 +204,19 @@
 //! The following illustrates most supported operations to the date and time:
 //!
 //! ```rust
-//! use chrono::prelude::*;
 //! use chrono::TimeDelta;
+//! use chrono::prelude::*;
 //!
 //! // assume this returned `2014-11-28T21:45:59.324310806+09:00`:
 //! let dt = FixedOffset::east_opt(9 * 3600)
-//!     .unwrap()
-//!     .from_local_datetime(
-//!         &NaiveDate::from_ymd_opt(2014, 11, 28)
-//!             .unwrap()
-//!             .and_hms_nano_opt(21, 45, 59, 324310806)
-//!             .unwrap(),
-//!     )
-//!     .unwrap();
+//!   .unwrap()
+//!   .from_local_datetime(
+//!     &NaiveDate::from_ymd_opt(2014, 11, 28)
+//!       .unwrap()
+//!       .and_hms_nano_opt(21, 45, 59, 324310806)
+//!       .unwrap(),
+//!   )
+//!   .unwrap();
 //!
 //! // property accessors
 //! assert_eq!((dt.year(), dt.month(), dt.day()), (2014, 11, 28));
@@ -229,12 +231,12 @@
 //! assert_eq!(dt.offset().fix().local_minus_utc(), 9 * 3600);
 //! assert_eq!(dt.timezone(), FixedOffset::east_opt(9 * 3600).unwrap());
 //! assert_eq!(
-//!     dt.with_timezone(&Utc),
-//!     NaiveDate::from_ymd_opt(2014, 11, 28)
-//!         .unwrap()
-//!         .and_hms_nano_opt(12, 45, 59, 324310806)
-//!         .unwrap()
-//!         .and_utc()
+//!   dt.with_timezone(&Utc),
+//!   NaiveDate::from_ymd_opt(2014, 11, 28)
+//!     .unwrap()
+//!     .and_hms_nano_opt(12, 45, 59, 324310806)
+//!     .unwrap()
+//!     .and_utc()
 //! );
 //!
 //! // a sample of property manipulations (validates dynamically)
@@ -248,14 +250,14 @@
 //! assert_eq!(dt1.signed_duration_since(dt2), TimeDelta::try_seconds(-2 * 3600 + 2).unwrap());
 //! assert_eq!(dt2.signed_duration_since(dt1), TimeDelta::try_seconds(2 * 3600 - 2).unwrap());
 //! assert_eq!(
-//!     Utc.with_ymd_and_hms(1970, 1, 1, 0, 0, 0).unwrap()
-//!         + TimeDelta::try_seconds(1_000_000_000).unwrap(),
-//!     Utc.with_ymd_and_hms(2001, 9, 9, 1, 46, 40).unwrap()
+//!   Utc.with_ymd_and_hms(1970, 1, 1, 0, 0, 0).unwrap()
+//!     + TimeDelta::try_seconds(1_000_000_000).unwrap(),
+//!   Utc.with_ymd_and_hms(2001, 9, 9, 1, 46, 40).unwrap()
 //! );
 //! assert_eq!(
-//!     Utc.with_ymd_and_hms(1970, 1, 1, 0, 0, 0).unwrap()
-//!         - TimeDelta::try_seconds(1_000_000_000).unwrap(),
-//!     Utc.with_ymd_and_hms(1938, 4, 24, 22, 13, 20).unwrap()
+//!   Utc.with_ymd_and_hms(1970, 1, 1, 0, 0, 0).unwrap()
+//!     - TimeDelta::try_seconds(1_000_000_000).unwrap(),
+//!   Utc.with_ymd_and_hms(1938, 4, 24, 22, 13, 20).unwrap()
 //! );
 //! ```
 //!
@@ -290,8 +292,8 @@
 //! assert_eq!(dt.format("%Y-%m-%d %H:%M:%S").to_string(), "2014-11-28 12:00:09");
 //! assert_eq!(dt.format("%a %b %e %T %Y").to_string(), "Fri Nov 28 12:00:09 2014");
 //! assert_eq!(
-//!     dt.format_localized("%A %e %B %Y, %T", Locale::fr_BE).to_string(),
-//!     "vendredi 28 novembre 2014, 12:00:09"
+//!   dt.format_localized("%A %e %B %Y, %T", Locale::fr_BE).to_string(),
+//!   "vendredi 28 novembre 2014, 12:00:09"
 //! );
 //!
 //! assert_eq!(dt.format("%a %b %e %T %Y").to_string(), dt.format("%c").to_string());
@@ -302,10 +304,10 @@
 //!
 //! // Note that milli/nanoseconds are only printed if they are non-zero
 //! let dt_nano = NaiveDate::from_ymd_opt(2014, 11, 28)
-//!     .unwrap()
-//!     .and_hms_nano_opt(12, 0, 9, 1)
-//!     .unwrap()
-//!     .and_utc();
+//!   .unwrap()
+//!   .and_hms_nano_opt(12, 0, 9, 1)
+//!   .unwrap()
+//!   .and_utc();
 //! assert_eq!(format!("{:?}", dt_nano), "2014-11-28T12:00:09.000000001Z");
 //! # }
 //! # #[cfg(not(all(feature = "unstable-locales", feature = "alloc")))]
@@ -343,13 +345,10 @@
 //!
 //! // method 2
 //! assert_eq!(
-//!     DateTime::parse_from_str("2014-11-28 21:00:09 +09:00", "%Y-%m-%d %H:%M:%S %z"),
-//!     Ok(fixed_dt.clone())
+//!   DateTime::parse_from_str("2014-11-28 21:00:09 +09:00", "%Y-%m-%d %H:%M:%S %z"),
+//!   Ok(fixed_dt.clone())
 //! );
-//! assert_eq!(
-//!     DateTime::parse_from_rfc2822("Fri, 28 Nov 2014 21:00:09 +0900"),
-//!     Ok(fixed_dt.clone())
-//! );
+//! assert_eq!(DateTime::parse_from_rfc2822("Fri, 28 Nov 2014 21:00:09 +0900"), Ok(fixed_dt.clone()));
 //! assert_eq!(DateTime::parse_from_rfc3339("2014-11-28T21:00:09+09:00"), Ok(fixed_dt.clone()));
 //!
 //! // oops, the year is missing!
@@ -377,7 +376,8 @@
 //! ```
 //! # #[cfg(feature = "alloc")] {
 //! // We need the trait in scope to use Utc::timestamp().
-//! use chrono::{DateTime, Utc};
+//! use chrono::DateTime;
+//! use chrono::Utc;
 //!
 //! // Construct a datetime from epoch:
 //! let dt: DateTime<Utc> = DateTime::from_timestamp_secs(1_500_000_000).unwrap();
@@ -407,8 +407,8 @@
 //! * Only the proleptic Gregorian calendar (i.e. extended to support older dates) is supported.
 //! * Date types are limited to about +/- 262,000 years from the common epoch.
 //! * Time types are limited to nanosecond accuracy.
-//! * Leap seconds can be represented, but Chrono does not fully support them.
-//!   See [Leap Second Handling](NaiveTime#leap-second-handling).
+//! * Leap seconds can be represented, but Chrono does not fully support them. See [Leap Second
+//!   Handling](NaiveTime#leap-second-handling).
 //!
 //! ## Rust version requirements
 //!
@@ -453,10 +453,10 @@
 //!
 //! ## Security advisories
 //!
-//! In November of 2020 [CVE-2020-26235] and [RUSTSEC-2020-0071] were opened against the `time` crate.
-//! @quininer had found that calls to `localtime_r` may be unsound ([chrono#499]). Eventually, almost
-//! a year later, this was also made into a security advisory against chrono as [RUSTSEC-2020-0159],
-//! which had platform code similar to `time`.
+//! In November of 2020 [CVE-2020-26235] and [RUSTSEC-2020-0071] were opened against the `time`
+//! crate. @quininer had found that calls to `localtime_r` may be unsound ([chrono#499]).
+//! Eventually, almost a year later, this was also made into a security advisory against chrono as
+//! [RUSTSEC-2020-0159], which had platform code similar to `time`.
 //!
 //! On Unix-like systems a process is given a timezone id or description via the `TZ` environment
 //! variable. We need this timezone data to calculate the current local time from a value that is
@@ -522,18 +522,26 @@ use core::fmt;
 
 /// A convenience module appropriate for glob imports (`use chrono::prelude::*;`).
 pub mod prelude {
-    #[allow(deprecated)]
-    pub use crate::Date;
-    #[cfg(feature = "clock")]
-    pub use crate::Local;
-    #[cfg(all(feature = "unstable-locales", feature = "alloc"))]
-    pub use crate::Locale;
-    pub use crate::SubsecRound;
-    pub use crate::{DateTime, SecondsFormat};
-    pub use crate::{Datelike, Month, Timelike, Weekday};
-    pub use crate::{FixedOffset, Utc};
-    pub use crate::{NaiveDate, NaiveDateTime, NaiveTime};
-    pub use crate::{Offset, TimeZone};
+  #[allow(deprecated)]
+  pub use crate::Date;
+  pub use crate::DateTime;
+  pub use crate::Datelike;
+  pub use crate::FixedOffset;
+  #[cfg(feature = "clock")]
+  pub use crate::Local;
+  #[cfg(all(feature = "unstable-locales", feature = "alloc"))]
+  pub use crate::Locale;
+  pub use crate::Month;
+  pub use crate::NaiveDate;
+  pub use crate::NaiveDateTime;
+  pub use crate::NaiveTime;
+  pub use crate::Offset;
+  pub use crate::SecondsFormat;
+  pub use crate::SubsecRound;
+  pub use crate::TimeZone;
+  pub use crate::Timelike;
+  pub use crate::Utc;
+  pub use crate::Weekday;
 }
 
 mod date;
@@ -541,26 +549,43 @@ mod date;
 pub use date::Date;
 #[doc(no_inline)]
 #[allow(deprecated)]
-pub use date::{MAX_DATE, MIN_DATE};
+pub use date::MAX_DATE;
+#[doc(no_inline)]
+#[allow(deprecated)]
+pub use date::MIN_DATE;
 
 mod datetime;
 pub use datetime::DateTime;
 #[allow(deprecated)]
 #[doc(no_inline)]
-pub use datetime::{MAX_DATETIME, MIN_DATETIME};
+pub use datetime::MAX_DATETIME;
+#[allow(deprecated)]
+#[doc(no_inline)]
+pub use datetime::MIN_DATETIME;
 
 pub mod format;
 /// L10n locales.
 #[cfg(feature = "unstable-locales")]
 pub use format::Locale;
-pub use format::{ParseError, ParseResult, SecondsFormat};
+pub use format::ParseError;
+pub use format::ParseResult;
+pub use format::SecondsFormat;
 
 pub mod naive;
 #[doc(inline)]
-pub use naive::{Days, NaiveDate, NaiveDateTime, NaiveTime};
-pub use naive::{IsoWeek, NaiveWeek};
+pub use naive::Days;
+pub use naive::IsoWeek;
+#[doc(inline)]
+pub use naive::NaiveDate;
+#[doc(inline)]
+pub use naive::NaiveDateTime;
+#[doc(inline)]
+pub use naive::NaiveTime;
+pub use naive::NaiveWeek;
 
 pub mod offset;
+#[doc(inline)]
+pub use offset::FixedOffset;
 #[cfg(feature = "clock")]
 #[doc(inline)]
 pub use offset::Local;
@@ -568,10 +593,16 @@ pub use offset::Local;
 pub use offset::LocalResult;
 pub use offset::MappedLocalTime;
 #[doc(inline)]
-pub use offset::{FixedOffset, Offset, TimeZone, Utc};
+pub use offset::Offset;
+#[doc(inline)]
+pub use offset::TimeZone;
+#[doc(inline)]
+pub use offset::Utc;
 
 pub mod round;
-pub use round::{DurationRound, RoundingError, SubsecRound};
+pub use round::DurationRound;
+pub use round::RoundingError;
+pub use round::SubsecRound;
 
 mod weekday;
 #[doc(no_inline)]
@@ -582,16 +613,17 @@ mod weekday_set;
 pub use weekday_set::WeekdaySet;
 
 mod month;
+pub use month::Month;
+pub use month::Months;
 #[doc(no_inline)]
 pub use month::ParseMonthError;
-pub use month::{Month, Months};
 
 mod traits;
-pub use traits::{Datelike, Timelike};
-
 #[cfg(feature = "__internal_bench")]
 #[doc(hidden)]
 pub use naive::__BenchYearFlags;
+pub use traits::Datelike;
+pub use traits::Timelike;
 
 /// Serialization/Deserialization with serde
 ///
@@ -610,33 +642,34 @@ pub use naive::__BenchYearFlags;
 /// [`deserialize_with`]: https://serde.rs/field-attrs.html#deserialize_with
 #[cfg(feature = "serde")]
 pub mod serde {
-    use core::fmt;
-    use serde::de;
+  use core::fmt;
 
-    pub use super::datetime::serde::*;
+  use serde::de;
 
-    /// Create a custom `de::Error` with `SerdeError::InvalidTimestamp`.
-    pub(crate) fn invalid_ts<E, T>(value: T) -> E
-    where
-        E: de::Error,
-        T: fmt::Display,
-    {
-        E::custom(SerdeError::InvalidTimestamp(value))
-    }
+  pub use super::datetime::serde::*;
 
-    enum SerdeError<T: fmt::Display> {
-        InvalidTimestamp(T),
-    }
+  /// Create a custom `de::Error` with `SerdeError::InvalidTimestamp`.
+  pub(crate) fn invalid_ts<E, T>(value: T) -> E
+  where
+    E: de::Error,
+    T: fmt::Display,
+  {
+    E::custom(SerdeError::InvalidTimestamp(value))
+  }
 
-    impl<T: fmt::Display> fmt::Display for SerdeError<T> {
-        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            match self {
-                SerdeError::InvalidTimestamp(ts) => {
-                    write!(f, "value is not a legal timestamp: {ts}")
-                }
-            }
+  enum SerdeError<T: fmt::Display> {
+    InvalidTimestamp(T),
+  }
+
+  impl<T: fmt::Display> fmt::Display for SerdeError<T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+      match self {
+        SerdeError::InvalidTimestamp(ts) => {
+          write!(f, "value is not a legal timestamp: {ts}")
         }
+      }
     }
+  }
 }
 
 /// Zero-copy serialization/deserialization with rkyv.
@@ -644,52 +677,54 @@ pub mod serde {
 /// This module re-exports the `Archived*` versions of chrono's types.
 #[cfg(any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"))]
 pub mod rkyv {
-    pub use crate::datetime::ArchivedDateTime;
-    pub use crate::month::ArchivedMonth;
-    pub use crate::naive::date::ArchivedNaiveDate;
-    pub use crate::naive::datetime::ArchivedNaiveDateTime;
-    pub use crate::naive::isoweek::ArchivedIsoWeek;
-    pub use crate::naive::time::ArchivedNaiveTime;
-    pub use crate::offset::fixed::ArchivedFixedOffset;
-    #[cfg(feature = "clock")]
-    pub use crate::offset::local::ArchivedLocal;
-    pub use crate::offset::utc::ArchivedUtc;
-    pub use crate::time_delta::ArchivedTimeDelta;
-    pub use crate::weekday::ArchivedWeekday;
+  pub use crate::datetime::ArchivedDateTime;
+  pub use crate::month::ArchivedMonth;
+  pub use crate::naive::date::ArchivedNaiveDate;
+  pub use crate::naive::datetime::ArchivedNaiveDateTime;
+  pub use crate::naive::isoweek::ArchivedIsoWeek;
+  pub use crate::naive::time::ArchivedNaiveTime;
+  pub use crate::offset::fixed::ArchivedFixedOffset;
+  #[cfg(feature = "clock")]
+  pub use crate::offset::local::ArchivedLocal;
+  pub use crate::offset::utc::ArchivedUtc;
+  pub use crate::time_delta::ArchivedTimeDelta;
+  pub use crate::weekday::ArchivedWeekday;
 
-    /// Alias of [`ArchivedTimeDelta`]
-    pub type ArchivedDuration = ArchivedTimeDelta;
+  /// Alias of [`ArchivedTimeDelta`]
+  pub type ArchivedDuration = ArchivedTimeDelta;
 }
 
 /// Out of range error type used in various converting APIs
 #[derive(Clone, Copy, Hash, PartialEq, Eq)]
 pub struct OutOfRange {
-    _private: (),
+  _private: (),
 }
 
 impl OutOfRange {
-    const fn new() -> OutOfRange {
-        OutOfRange { _private: () }
+  const fn new() -> OutOfRange {
+    OutOfRange {
+      _private: ()
     }
+  }
 }
 
 impl fmt::Display for OutOfRange {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "out of range")
-    }
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    write!(f, "out of range")
+  }
 }
 
 impl fmt::Debug for OutOfRange {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "out of range")
-    }
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    write!(f, "out of range")
+  }
 }
 
 #[cfg(feature = "defmt")]
 impl defmt::Format for OutOfRange {
-    fn format(&self, fmt: defmt::Formatter) {
-        defmt::write!(fmt, "out of range");
-    }
+  fn format(&self, fmt: defmt::Formatter) {
+    defmt::write!(fmt, "out of range");
+  }
 }
 
 #[cfg(feature = "std")]
@@ -702,42 +737,54 @@ impl core::error::Error for OutOfRange {}
 #[macro_export]
 #[doc(hidden)]
 macro_rules! try_opt {
-    ($e:expr) => {
-        match $e {
-            Some(v) => v,
-            None => return None,
-        }
-    };
+  ($e:expr) => {
+    match $e {
+      Some(v) => v,
+      None => return None,
+    }
+  };
 }
 
 /// Workaround because `.expect()` is not (yet) available in const context.
 pub(crate) const fn expect<T: Copy>(opt: Option<T>, msg: &str) -> T {
-    match opt {
-        Some(val) => val,
-        None => panic!("{}", msg),
-    }
+  match opt {
+    Some(val) => val,
+    None => panic!("{}", msg),
+  }
 }
 
 #[cfg(test)]
 mod tests {
-    #[cfg(feature = "clock")]
-    use crate::{DateTime, FixedOffset, Local, NaiveDate, NaiveDateTime, NaiveTime, Utc};
+  #[cfg(feature = "clock")]
+  use crate::DateTime;
+  #[cfg(feature = "clock")]
+  use crate::FixedOffset;
+  #[cfg(feature = "clock")]
+  use crate::Local;
+  #[cfg(feature = "clock")]
+  use crate::NaiveDate;
+  #[cfg(feature = "clock")]
+  use crate::NaiveDateTime;
+  #[cfg(feature = "clock")]
+  use crate::NaiveTime;
+  #[cfg(feature = "clock")]
+  use crate::Utc;
 
-    #[test]
-    #[allow(deprecated)]
-    #[cfg(feature = "clock")]
-    fn test_type_sizes() {
-        use core::mem::size_of;
-        assert_eq!(size_of::<NaiveDate>(), 4);
-        assert_eq!(size_of::<Option<NaiveDate>>(), 4);
-        assert_eq!(size_of::<NaiveTime>(), 8);
-        assert_eq!(size_of::<Option<NaiveTime>>(), 12);
-        assert_eq!(size_of::<NaiveDateTime>(), 12);
-        assert_eq!(size_of::<Option<NaiveDateTime>>(), 12);
+  #[test]
+  #[allow(deprecated)]
+  #[cfg(feature = "clock")]
+  fn test_type_sizes() {
+    use core::mem::size_of;
+    assert_eq!(size_of::<NaiveDate>(), 4);
+    assert_eq!(size_of::<Option<NaiveDate>>(), 4);
+    assert_eq!(size_of::<NaiveTime>(), 8);
+    assert_eq!(size_of::<Option<NaiveTime>>(), 12);
+    assert_eq!(size_of::<NaiveDateTime>(), 12);
+    assert_eq!(size_of::<Option<NaiveDateTime>>(), 12);
 
-        assert_eq!(size_of::<DateTime<Utc>>(), 12);
-        assert_eq!(size_of::<DateTime<FixedOffset>>(), 16);
-        assert_eq!(size_of::<DateTime<Local>>(), 16);
-        assert_eq!(size_of::<Option<DateTime<FixedOffset>>>(), 16);
-    }
+    assert_eq!(size_of::<DateTime<Utc>>(), 12);
+    assert_eq!(size_of::<DateTime<FixedOffset>>(), 16);
+    assert_eq!(size_of::<DateTime<Local>>(), 16);
+    assert_eq!(size_of::<Option<DateTime<FixedOffset>>>(), 16);
+  }
 }
