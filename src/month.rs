@@ -1,10 +1,10 @@
 use core::fmt;
 
-#[cfg(any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"))]
+#[cfg(feature = "rkyv")]
 use rkyv::Archive;
-#[cfg(any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"))]
+#[cfg(feature = "rkyv")]
 use rkyv::Deserialize;
-#[cfg(any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"))]
+#[cfg(feature = "rkyv")]
 use rkyv::Serialize;
 
 use crate::OutOfRange;
@@ -35,12 +35,13 @@ use crate::naive::NaiveDate;
 // Actual implementation is zero-indexed, API intended as 1-indexed for more intuitive behavior.
 #[derive(PartialEq, Eq, Copy, Clone, Debug, Hash, PartialOrd, Ord)]
 #[cfg_attr(
-  any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"),
+  feature = "rkyv",
   derive(Archive, Deserialize, Serialize),
-  archive(compare(PartialEq, PartialOrd)),
-  archive_attr(derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Hash))
+  rkyv(
+    compare(PartialEq, PartialOrd),
+    derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Hash)
+  )
 )]
-#[cfg_attr(feature = "rkyv-validation", archive(check_bytes))]
 #[cfg_attr(all(feature = "arbitrary", feature = "std"), derive(arbitrary::Arbitrary))]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum Month {
@@ -483,8 +484,7 @@ mod tests {
   #[cfg(feature = "rkyv-validation")]
   fn test_rkyv_validation() {
     let month = Month::January;
-    let bytes = rkyv::to_bytes::<_, 1>(&month).unwrap();
-    assert_eq!(rkyv::from_bytes::<Month>(&bytes).unwrap(), month);
+    assert_eq!(crate::rkyv_test::roundtrip(&month).unwrap(), month);
   }
 
   #[test]

@@ -1,0 +1,297 @@
+schema-version = "1"
+producer-repository = "https://github.com/strict-rs/strict-chrono"
+producer-revision = "cc3ba6e0a512101df43b31a8f5bd230a7695c01b"
+rkyv-version = "0.7.46"
+toolchain = "rustc 1.97.1 (8bab26f4f 2026-07-14)"
+archive-version = "0.7"
+pointer-width = 64
+endianness = "little"
+
+[[fixtures]]
+file = "time-delta-min.bin"
+type = "TimeDelta"
+logical-value = "TimeDelta { secs: -9223372036854776, nanos: 193000000 }"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "time-delta-negative.bin"
+type = "TimeDelta"
+logical-value = "TimeDelta::new(-2, 750000000)"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "time-delta-zero.bin"
+type = "TimeDelta"
+logical-value = "TimeDelta::zero()"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "time-delta-max.bin"
+type = "TimeDelta"
+logical-value = "TimeDelta { secs: 9223372036854775, nanos: 807000000 }"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "naive-date-min.bin"
+type = "NaiveDate"
+logical-value = "-262143-01-01"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "naive-date-representative.bin"
+type = "NaiveDate"
+logical-value = "2024-02-29"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "naive-date-max.bin"
+type = "NaiveDate"
+logical-value = "+262142-12-31"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "naive-time-min.bin"
+type = "NaiveTime"
+logical-value = "00:00:00"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "naive-time-representative.bin"
+type = "NaiveTime"
+logical-value = "12:34:56.789"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "naive-time-leap.bin"
+type = "NaiveTime"
+logical-value = "23:59:60.500"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "naive-time-max.bin"
+type = "NaiveTime"
+logical-value = "23:59:59.999999999"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "naive-datetime-min.bin"
+type = "NaiveDateTime"
+logical-value = "-262143-01-01T00:00:00"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "naive-datetime-representative.bin"
+type = "NaiveDateTime"
+logical-value = "2024-02-29T12:34:56.789"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "naive-datetime-leap.bin"
+type = "NaiveDateTime"
+logical-value = "2024-02-29T23:59:60.500"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "naive-datetime-max.bin"
+type = "NaiveDateTime"
+logical-value = "+262142-12-31T23:59:59.999999999"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "iso-week-min.bin"
+type = "IsoWeek"
+logical-value = "-262143-W01"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "iso-week-representative.bin"
+type = "IsoWeek"
+logical-value = "2024-W09"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "iso-week-max.bin"
+type = "IsoWeek"
+logical-value = "+262143-W01"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "utc.bin"
+type = "Utc"
+logical-value = "Utc"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "local.bin"
+type = "Local"
+logical-value = "Local"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "fixed-offset-min.bin"
+type = "FixedOffset"
+logical-value = "-23:59:59"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "fixed-offset-zero.bin"
+type = "FixedOffset"
+logical-value = "+00:00"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "fixed-offset-max.bin"
+type = "FixedOffset"
+logical-value = "+23:59:59"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "month-min.bin"
+type = "Month"
+logical-value = "January"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "month-max.bin"
+type = "Month"
+logical-value = "December"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "weekday-min.bin"
+type = "Weekday"
+logical-value = "Mon"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "weekday-max.bin"
+type = "Weekday"
+logical-value = "Sun"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "datetime-utc-min.bin"
+type = "DateTime<Utc>"
+logical-value = "-262143-01-01T00:00:00Z"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "datetime-utc-representative.bin"
+type = "DateTime<Utc>"
+logical-value = "2024-02-29T12:34:56.789Z"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "datetime-utc-leap.bin"
+type = "DateTime<Utc>"
+logical-value = "2024-02-29T23:59:60.500Z"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "datetime-utc-max.bin"
+type = "DateTime<Utc>"
+logical-value = "+262142-12-31T23:59:59.999999999Z"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "datetime-fixed-min.bin"
+type = "DateTime<FixedOffset>"
+logical-value = "-262143-01-01T00:00:00+00:00"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "datetime-fixed-representative.bin"
+type = "DateTime<FixedOffset>"
+logical-value = "2024-02-29T18:04:56.789+05:30"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "datetime-fixed-leap.bin"
+type = "DateTime<FixedOffset>"
+logical-value = "2024-02-29T18:59:60.500-05:00"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "datetime-fixed-max.bin"
+type = "DateTime<FixedOffset>"
+logical-value = "+262142-12-31T23:59:59.999999999+00:00"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "datetime-local-min.bin"
+type = "DateTime<Local>"
+logical-value = "-262143-01-01T00:00:00+00:00"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "datetime-local-representative.bin"
+type = "DateTime<Local>"
+logical-value = "2024-02-29T18:04:56.789+05:30"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "datetime-local-leap.bin"
+type = "DateTime<Local>"
+logical-value = "2024-02-29T18:59:60.500-05:00"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "datetime-local-max.bin"
+type = "DateTime<Local>"
+logical-value = "+262142-12-31T23:59:59.999999999+00:00"
+producer-kind = "chrono-public-derive"
+
+[[fixtures]]
+file = "date-utc-min.bin"
+type = "Date<Utc>"
+logical-value = "-262143-01-01Z"
+producer-kind = "frozen-pre-upgrade-date-layout"
+
+[[fixtures]]
+file = "date-utc-representative.bin"
+type = "Date<Utc>"
+logical-value = "2024-02-29Z"
+producer-kind = "frozen-pre-upgrade-date-layout"
+
+[[fixtures]]
+file = "date-utc-max.bin"
+type = "Date<Utc>"
+logical-value = "+262142-12-31Z"
+producer-kind = "frozen-pre-upgrade-date-layout"
+
+[[fixtures]]
+file = "date-fixed-min.bin"
+type = "Date<FixedOffset>"
+logical-value = "-262143-01-01+00:00"
+producer-kind = "frozen-pre-upgrade-date-layout"
+
+[[fixtures]]
+file = "date-fixed-representative.bin"
+type = "Date<FixedOffset>"
+logical-value = "2024-02-29+05:30"
+producer-kind = "frozen-pre-upgrade-date-layout"
+
+[[fixtures]]
+file = "date-fixed-max.bin"
+type = "Date<FixedOffset>"
+logical-value = "+262142-12-31+00:00"
+producer-kind = "frozen-pre-upgrade-date-layout"
+
+[[fixtures]]
+file = "date-local-min.bin"
+type = "Date<Local>"
+logical-value = "-262143-01-01+00:00"
+producer-kind = "frozen-pre-upgrade-date-layout"
+
+[[fixtures]]
+file = "date-local-representative.bin"
+type = "Date<Local>"
+logical-value = "2024-02-29+05:30"
+producer-kind = "frozen-pre-upgrade-date-layout"
+
+[[fixtures]]
+file = "date-local-max.bin"
+type = "Date<Local>"
+logical-value = "+262142-12-31+00:00"
+producer-kind = "frozen-pre-upgrade-date-layout"
+

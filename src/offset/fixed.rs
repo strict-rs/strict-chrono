@@ -6,11 +6,11 @@
 use core::fmt;
 use core::str::FromStr;
 
-#[cfg(any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"))]
+#[cfg(feature = "rkyv")]
 use rkyv::Archive;
-#[cfg(any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"))]
+#[cfg(feature = "rkyv")]
 use rkyv::Deserialize;
-#[cfg(any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"))]
+#[cfg(feature = "rkyv")]
 use rkyv::Serialize;
 
 use super::MappedLocalTime;
@@ -30,12 +30,13 @@ use crate::naive::NaiveDateTime;
 /// [`west_opt`](#method.west_opt) methods for examples.
 #[derive(PartialEq, Eq, Hash, Copy, Clone)]
 #[cfg_attr(
-  any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"),
+  feature = "rkyv",
   derive(Archive, Deserialize, Serialize),
-  archive(compare(PartialEq)),
-  archive_attr(derive(Clone, Copy, PartialEq, Eq, Hash, Debug))
+  rkyv(
+    compare(PartialEq),
+    derive(Clone, Copy, PartialEq, Eq, Hash, Debug)
+  )
 )]
-#[cfg_attr(feature = "rkyv-validation", archive(check_bytes))]
 pub struct FixedOffset {
   local_minus_utc: i32,
 }
@@ -255,7 +256,6 @@ mod tests {
   #[cfg(feature = "rkyv-validation")]
   fn test_rkyv_validation() {
     let offset = FixedOffset::from_str("-0500").unwrap();
-    let bytes = rkyv::to_bytes::<_, 4>(&offset).unwrap();
-    assert_eq!(rkyv::from_bytes::<FixedOffset>(&bytes).unwrap(), offset);
+    assert_eq!(crate::rkyv_test::roundtrip(&offset).unwrap(), offset);
   }
 }

@@ -24,11 +24,11 @@ use core::time::Duration;
 #[cfg(feature = "std")]
 use std::error::Error;
 
-#[cfg(any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"))]
+#[cfg(feature = "rkyv")]
 use rkyv::Archive;
-#[cfg(any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"))]
+#[cfg(feature = "rkyv")]
 use rkyv::Deserialize;
-#[cfg(any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"))]
+#[cfg(feature = "rkyv")]
 use rkyv::Serialize;
 
 use crate::expect;
@@ -64,12 +64,13 @@ const SECS_PER_WEEK: i64 = 604_800;
 /// instance `abs()` can be called without any checks.
 #[derive(Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Debug, Hash)]
 #[cfg_attr(
-  any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"),
+  feature = "rkyv",
   derive(Archive, Deserialize, Serialize),
-  archive(compare(PartialEq, PartialOrd)),
-  archive_attr(derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Hash))
+  rkyv(
+    compare(PartialEq, PartialOrd),
+    derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Hash)
+  )
 )]
-#[cfg_attr(feature = "rkyv-validation", archive(check_bytes))]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct TimeDelta {
   secs:  i64,
@@ -1356,7 +1357,6 @@ mod tests {
   #[cfg(feature = "rkyv-validation")]
   fn test_rkyv_validation() {
     let duration = TimeDelta::try_seconds(1).unwrap();
-    let bytes = rkyv::to_bytes::<_, 16>(&duration).unwrap();
-    assert_eq!(rkyv::from_bytes::<TimeDelta>(&bytes).unwrap(), duration);
+    assert_eq!(crate::rkyv_test::roundtrip(&duration).unwrap(), duration);
   }
 }

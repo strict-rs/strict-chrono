@@ -1,4 +1,4 @@
-schema-version = "0.1.0"
+schema-version = "0.2.0"
 
 [template]
 id = "rust-template"
@@ -10,6 +10,116 @@ branch = "main"
 
 [ecosystems]
 order = ["cargo"]
+
+[ecosystems.cargo.features]
+canonical-profile = "rkyv"
+matrix-profiles = [
+  "no-default",
+  "default",
+  "rkyv-base",
+  "rkyv",
+  "rkyv-16-le",
+  "rkyv-16-be",
+  "rkyv-32-be",
+  "rkyv-64-le",
+  "rkyv-64-be",
+]
+
+[[ecosystems.cargo.features.profiles]]
+name = "no-default"
+mode = "no-default"
+
+[[ecosystems.cargo.features.profiles]]
+name = "default"
+mode = "default"
+
+[[ecosystems.cargo.features.profiles]]
+name = "rkyv-base"
+mode = "features"
+features = ["chrono/default", "chrono/rkyv", "chrono/rkyv-validation"]
+
+[[ecosystems.cargo.features.profiles]]
+name = "rkyv"
+mode = "all-except"
+exclude = [
+  "chrono/rkyv-16",
+  "chrono/rkyv-64",
+  "chrono-rkyv-migrate/legacy-16-le",
+  "chrono-rkyv-migrate/legacy-16-be",
+  "chrono-rkyv-migrate/legacy-32-be",
+  "chrono-rkyv-migrate/legacy-64-le",
+  "chrono-rkyv-migrate/legacy-64-be",
+]
+
+[[ecosystems.cargo.features.profiles]]
+name = "rkyv-16-le"
+mode = "all-except"
+exclude = [
+  "chrono/rkyv-32",
+  "chrono/rkyv-64",
+  "chrono-rkyv-migrate/default",
+  "chrono-rkyv-migrate/legacy-16-be",
+  "chrono-rkyv-migrate/legacy-32-le",
+  "chrono-rkyv-migrate/legacy-32-be",
+  "chrono-rkyv-migrate/legacy-64-le",
+  "chrono-rkyv-migrate/legacy-64-be",
+]
+
+[[ecosystems.cargo.features.profiles]]
+name = "rkyv-16-be"
+mode = "all-except"
+exclude = [
+  "chrono/rkyv-32",
+  "chrono/rkyv-64",
+  "chrono-rkyv-migrate/default",
+  "chrono-rkyv-migrate/legacy-16-le",
+  "chrono-rkyv-migrate/legacy-32-le",
+  "chrono-rkyv-migrate/legacy-32-be",
+  "chrono-rkyv-migrate/legacy-64-le",
+  "chrono-rkyv-migrate/legacy-64-be",
+]
+
+[[ecosystems.cargo.features.profiles]]
+name = "rkyv-32-be"
+mode = "all-except"
+exclude = [
+  "chrono/rkyv-16",
+  "chrono/rkyv-64",
+  "chrono-rkyv-migrate/default",
+  "chrono-rkyv-migrate/legacy-16-le",
+  "chrono-rkyv-migrate/legacy-16-be",
+  "chrono-rkyv-migrate/legacy-32-le",
+  "chrono-rkyv-migrate/legacy-64-le",
+  "chrono-rkyv-migrate/legacy-64-be",
+]
+
+[[ecosystems.cargo.features.profiles]]
+name = "rkyv-64-le"
+mode = "all-except"
+exclude = [
+  "chrono/rkyv-16",
+  "chrono/rkyv-32",
+  "chrono-rkyv-migrate/default",
+  "chrono-rkyv-migrate/legacy-16-le",
+  "chrono-rkyv-migrate/legacy-16-be",
+  "chrono-rkyv-migrate/legacy-32-le",
+  "chrono-rkyv-migrate/legacy-32-be",
+  "chrono-rkyv-migrate/legacy-64-be",
+]
+
+[[ecosystems.cargo.features.profiles]]
+name = "rkyv-64-be"
+mode = "all-except"
+exclude = [
+  "chrono/rkyv-16",
+  "chrono/rkyv-32",
+  "chrono-rkyv-migrate/default",
+  "chrono-rkyv-migrate/legacy-16-le",
+  "chrono-rkyv-migrate/legacy-16-be",
+  "chrono-rkyv-migrate/legacy-32-le",
+  "chrono-rkyv-migrate/legacy-32-be",
+  "chrono-rkyv-migrate/legacy-64-le",
+]
 
 [ecosystems.cargo.layout]
 kind = "flat"
@@ -206,7 +316,7 @@ ownership = "template"
 file = ".cargo/config.toml"
 
 [[contracts.toml.keys]]
-key = "alias.xtask"
+key = "alias.stask"
 ownership = "template"
 
 [[contracts.toml.keys]]
@@ -740,7 +850,7 @@ dependencies = [
   "strict-test-support",
   "syn",
   "template-core",
-  "template-xtask",
+  "template-stask",
   "thiserror",
   "toml",
   "toml_edit",
@@ -748,10 +858,10 @@ dependencies = [
 ]
 
 [[ecosystems.cargo.update.manifests]]
-path = "xtask/Cargo.toml"
+path = "stask/Cargo.toml"
 dependencies = [
   "template-core",
-  "template-xtask",
+  "template-stask",
 ]
 dev-dependencies = ["strict-test-support"]
 
@@ -787,7 +897,7 @@ code-quality   = ["dupes.toml", ".jscpd.json"]
 toolchain      = ["rust-toolchain.toml"]
 github         = [".github/dependabot.yml", ".github/workflows/ci.yml", ".github/workflows/scheduled.yml"]
 automation     = ["justfile"]
-guidance       = ["AGENTS.md", "README.md", "xtask/AGENTS.md"]
+guidance       = ["AGENTS.md", "README.md", "stask/AGENTS.md"]
 repository     = [".gitattributes", ".gitmodules", "LICENSE"]
 
 [[gates.rules]]
@@ -824,9 +934,9 @@ reason   = "changed bundled agent skills or repo marketplace entries"
 
 [[gates.rules]]
 id        = "shared-workflow"
-when-any  = ["glob:xtask/**", "glob:.github/workflows/**", "path:justfile", "path:clippy.toml", "path:rustfmt.toml", "path:deny.toml", "path:dupes.toml", "path:.jscpd.json", "path:rust-toolchain.toml", "path:template-lint.toml", "path:template-clippy.toml"]
+when-any  = ["glob:stask/**", "glob:.github/workflows/**", "path:justfile", "path:clippy.toml", "path:rustfmt.toml", "path:deny.toml", "path:dupes.toml", "path:.jscpd.json", "path:rust-toolchain.toml", "path:template-lint.toml", "path:template-clippy.toml"]
 command   = "just ci"
-reason    = "changed shared workflow, policy, or xtask automation"
+reason    = "changed shared workflow, policy, or stask automation"
 exclusive = true
 fallout   = ["`just ci`, `just cq`, any coverage workflow, or the pre-commit hook may refresh transient reports under `cov/` and committed `badges/`."]
 

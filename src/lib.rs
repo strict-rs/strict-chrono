@@ -35,26 +35,32 @@
 //! Optional features:
 //!
 //! - `serde`: Enable serialization/deserialization via [serde].
-//! - `rkyv`: Deprecated, use the `rkyv-*` features.
-//! - `rkyv-16`: Enable serialization/deserialization via [rkyv], using 16-bit integers for integral
-//!   `*size` types.
-//! - `rkyv-32`: Enable serialization/deserialization via [rkyv], using 32-bit integers for integral
-//!   `*size` types.
-//! - `rkyv-64`: Enable serialization/deserialization via [rkyv], using 64-bit integers for integral
-//!   `*size` types.
-//! - `rkyv-validation`: Enable rkyv validation support using `bytecheck`.
+//! - `rkyv`: Enable serialization/deserialization via [rkyv]. Without an explicit width selector,
+//!   rkyv uses its 32-bit archived-pointer fallback.
+//! - `rkyv-16`: Enable `rkyv` with 16-bit archived pointers.
+//! - `rkyv-32`: Enable `rkyv` with an explicit 32-bit archived-pointer selector.
+//! - `rkyv-64`: Enable `rkyv` with 64-bit archived pointers.
+//! - `rkyv-validation`: Enable `rkyv` and checked archive validation through `bytecheck`.
 //! - `arbitrary`: Construct arbitrary instances of a type with the Arbitrary crate.
 //! - `unstable-locales`: Enable localization. This adds various methods with a `_localized` suffix.
 //!   The implementation and API may change or even be removed in a patch release. Feedback welcome.
 //! - `oldtime`: This feature no longer has any effect; it used to offer compatibility with the
 //!   `time` 0.1 crate.
 //!
-//! Note: The `rkyv{,-16,-32,-64}` features are mutually exclusive.
+//! The `rkyv-16`, `rkyv-32`, and `rkyv-64` selectors are mutually exclusive with one another. Each
+//! selector implies the base `rkyv` integration, as does `rkyv-validation`.
+//!
+//! `rkyv` `0.8` archives are not compatible with `rkyv` `0.7` archives. The strict-chrono
+//! repository includes the [`chrono-rkyv-migrate`] companion library and CLI for checked
+//! conversion from frozen `0.7` chrono layouts to canonical little-endian `0.8` archives. Callers
+//! must select the legacy pointer width and endianness; application containers and custom timezone
+//! schemas implement the companion's `LegacyDecode` extension trait.
 //!
 //! See the [cargo docs] for examples of specifying features.
 //!
 //! [serde]: https://github.com/serde-rs/serde
 //! [rkyv]: https://github.com/rkyv/rkyv
+//! [`chrono-rkyv-migrate`]: https://github.com/strict-rs/strict-chrono/tree/main/chrono-rkyv-migrate
 //! [cargo docs]: https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#choosing-features
 //!
 //! ## Overview
@@ -510,6 +516,10 @@
 extern crate alloc;
 
 mod time_delta;
+#[cfg(all(test, feature = "rkyv"))]
+mod rkyv_contract_test;
+#[cfg(all(test, feature = "rkyv-validation"))]
+mod rkyv_test;
 #[doc(no_inline)]
 #[cfg(any(feature = "std", feature = "core-error"))]
 pub use time_delta::OutOfRangeError;
@@ -675,7 +685,7 @@ pub mod serde {
 /// Zero-copy serialization/deserialization with rkyv.
 ///
 /// This module re-exports the `Archived*` versions of chrono's types.
-#[cfg(any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"))]
+#[cfg(feature = "rkyv")]
 pub mod rkyv {
   pub use crate::datetime::ArchivedDateTime;
   pub use crate::month::ArchivedMonth;

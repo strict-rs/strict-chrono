@@ -27,11 +27,11 @@ use core::str;
 /// L10n locales.
 #[cfg(all(feature = "unstable-locales", feature = "alloc"))]
 use pure_rust_locales::Locale;
-#[cfg(any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"))]
+#[cfg(feature = "rkyv")]
 use rkyv::Archive;
-#[cfg(any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"))]
+#[cfg(feature = "rkyv")]
 use rkyv::Deserialize;
-#[cfg(any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"))]
+#[cfg(feature = "rkyv")]
 use rkyv::Serialize;
 
 use super::internals::Mdf;
@@ -113,12 +113,13 @@ mod tests;
 /// [proleptic Gregorian date]: crate::NaiveDate#calendar-date
 #[derive(PartialEq, Eq, Hash, PartialOrd, Ord, Copy, Clone)]
 #[cfg_attr(
-  any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"),
+  feature = "rkyv",
   derive(Archive, Deserialize, Serialize),
-  archive(compare(PartialEq, PartialOrd)),
-  archive_attr(derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Hash))
+  rkyv(
+    compare(PartialEq, PartialOrd),
+    derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Hash)
+  )
 )]
-#[cfg_attr(feature = "rkyv-validation", archive(check_bytes))]
 pub struct NaiveDate {
   yof: NonZeroI32, // (year << 13) | of
 }

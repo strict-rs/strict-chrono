@@ -14,11 +14,11 @@ use core::ops::SubAssign;
 use core::str;
 use core::time::Duration;
 
-#[cfg(any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"))]
+#[cfg(feature = "rkyv")]
 use rkyv::Archive;
-#[cfg(any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"))]
+#[cfg(feature = "rkyv")]
 use rkyv::Deserialize;
-#[cfg(any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"))]
+#[cfg(feature = "rkyv")]
 use rkyv::Serialize;
 
 use crate::DateTime;
@@ -93,12 +93,13 @@ pub const MAX_DATETIME: NaiveDateTime = NaiveDateTime::MAX;
 /// ```
 #[derive(PartialEq, Eq, Hash, PartialOrd, Ord, Copy, Clone)]
 #[cfg_attr(
-  any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"),
+  feature = "rkyv",
   derive(Archive, Deserialize, Serialize),
-  archive(compare(PartialEq, PartialOrd)),
-  archive_attr(derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Hash))
+  rkyv(
+    compare(PartialEq, PartialOrd),
+    derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Hash)
+  )
 )]
-#[cfg_attr(feature = "rkyv-validation", archive(check_bytes))]
 #[cfg_attr(all(feature = "arbitrary", feature = "std"), derive(arbitrary::Arbitrary))]
 pub struct NaiveDateTime {
   date: NaiveDate,

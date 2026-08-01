@@ -21,11 +21,11 @@ use std::time::SystemTime;
 #[cfg(feature = "std")]
 use std::time::UNIX_EPOCH;
 
-#[cfg(any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"))]
+#[cfg(feature = "rkyv")]
 use rkyv::Archive;
-#[cfg(any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"))]
+#[cfg(feature = "rkyv")]
 use rkyv::Deserialize;
-#[cfg(any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"))]
+#[cfg(feature = "rkyv")]
 use rkyv::Serialize;
 
 #[allow(deprecated)]
@@ -83,11 +83,10 @@ mod tests;
 /// [`TimeZone`](./offset/trait.TimeZone.html) implementations.
 #[derive(Clone)]
 #[cfg_attr(
-  any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"),
+  feature = "rkyv",
   derive(Archive, Deserialize, Serialize),
-  archive(compare(PartialEq, PartialOrd))
+  rkyv(compare(PartialEq, PartialOrd))
 )]
-#[cfg_attr(feature = "rkyv-validation", archive(check_bytes))]
 pub struct DateTime<Tz: TimeZone> {
   datetime: NaiveDateTime,
   offset:   Tz::Offset,
@@ -1901,7 +1900,7 @@ where
 // * https://github.com/rust-lang/rust/issues/26925
 // * https://github.com/rkyv/rkyv/issues/333
 // * https://github.com/dtolnay/syn/issues/370
-#[cfg(feature = "rkyv-validation")]
+#[cfg(feature = "rkyv")]
 impl<Tz: TimeZone> fmt::Debug for ArchivedDateTime<Tz>
 where
   Tz: Archive,

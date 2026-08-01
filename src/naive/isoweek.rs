@@ -5,11 +5,11 @@
 
 use core::fmt;
 
-#[cfg(any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"))]
+#[cfg(feature = "rkyv")]
 use rkyv::Archive;
-#[cfg(any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"))]
+#[cfg(feature = "rkyv")]
 use rkyv::Deserialize;
-#[cfg(any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"))]
+#[cfg(feature = "rkyv")]
 use rkyv::Serialize;
 
 use super::internals::YearFlags;
@@ -22,12 +22,13 @@ use super::internals::YearFlags;
 /// via the [`Datelike::iso_week`](../trait.Datelike.html#tymethod.iso_week) method.
 #[derive(PartialEq, Eq, PartialOrd, Ord, Copy, Clone, Hash)]
 #[cfg_attr(
-  any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"),
+  feature = "rkyv",
   derive(Archive, Deserialize, Serialize),
-  archive(compare(PartialEq, PartialOrd)),
-  archive_attr(derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Hash))
+  rkyv(
+    compare(PartialEq, PartialOrd),
+    derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug, Hash)
+  )
 )]
-#[cfg_attr(feature = "rkyv-validation", archive(check_bytes))]
 pub struct IsoWeek {
   // Note that this allows for larger year range than `NaiveDate`.
   // This is crucial because we have an edge case for the first and last week supported,
@@ -186,8 +187,6 @@ impl defmt::Format for IsoWeek {
 
 #[cfg(test)]
 mod tests {
-  #[cfg(feature = "rkyv-validation")]
-  use super::IsoWeek;
   use crate::Datelike;
   use crate::naive::date::NaiveDate;
   use crate::naive::date::{
@@ -250,11 +249,9 @@ mod tests {
   #[cfg(feature = "rkyv-validation")]
   fn test_rkyv_validation() {
     let minweek = NaiveDate::MIN.iso_week();
-    let bytes = rkyv::to_bytes::<_, 4>(&minweek).unwrap();
-    assert_eq!(rkyv::from_bytes::<IsoWeek>(&bytes).unwrap(), minweek);
+    assert_eq!(crate::rkyv_test::roundtrip(&minweek).unwrap(), minweek);
 
     let maxweek = NaiveDate::MAX.iso_week();
-    let bytes = rkyv::to_bytes::<_, 4>(&maxweek).unwrap();
-    assert_eq!(rkyv::from_bytes::<IsoWeek>(&bytes).unwrap(), maxweek);
+    assert_eq!(crate::rkyv_test::roundtrip(&maxweek).unwrap(), maxweek);
   }
 }

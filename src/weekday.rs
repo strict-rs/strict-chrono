@@ -1,10 +1,10 @@
 use core::fmt;
 
-#[cfg(any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"))]
+#[cfg(feature = "rkyv")]
 use rkyv::Archive;
-#[cfg(any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"))]
+#[cfg(feature = "rkyv")]
 use rkyv::Deserialize;
-#[cfg(any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"))]
+#[cfg(feature = "rkyv")]
 use rkyv::Serialize;
 
 use crate::OutOfRange;
@@ -35,12 +35,13 @@ use crate::OutOfRange;
 /// ```
 #[derive(PartialEq, Eq, Copy, Clone, Debug, Hash)]
 #[cfg_attr(
-  any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"),
+  feature = "rkyv",
   derive(Archive, Deserialize, Serialize),
-  archive(compare(PartialEq)),
-  archive_attr(derive(Clone, Copy, PartialEq, Eq, Debug, Hash))
+  rkyv(
+    compare(PartialEq),
+    derive(Clone, Copy, PartialEq, Eq, Debug, Hash)
+  )
 )]
-#[cfg_attr(feature = "rkyv-validation", archive(check_bytes))]
 #[cfg_attr(all(feature = "arbitrary", feature = "std"), derive(arbitrary::Arbitrary))]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum Weekday {
@@ -418,8 +419,6 @@ mod tests {
   #[cfg(feature = "rkyv-validation")]
   fn test_rkyv_validation() {
     let mon = Weekday::Mon;
-    let bytes = rkyv::to_bytes::<_, 1>(&mon).unwrap();
-
-    assert_eq!(rkyv::from_bytes::<Weekday>(&bytes).unwrap(), mon);
+    assert_eq!(crate::rkyv_test::roundtrip(&mon).unwrap(), mon);
   }
 }

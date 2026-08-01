@@ -1,0 +1,39 @@
+[package]
+name = "chrono-rkyv-migrate"
+version.workspace = true
+edition = "2021"
+rust-version.workspace = true
+license-file.workspace = true
+authors.workspace = true
+repository.workspace = true
+readme = "README.md"
+description = "Checked migration of chrono rkyv 0.7 archives to rkyv 0.8"
+keywords = ["chrono", "migration", "rkyv", "serialization"]
+categories = ["date-and-time", "encoding"]
+publish = false
+
+[features]
+default = ["cli", "legacy-32-le"]
+cli = ["dep:bpaf"]
+legacy-16-le = ["chrono/rkyv-16", "rkyv/pointer_width_16", "dep:rkyv07", "rkyv07/size_16", "rkyv07/archive_le"]
+legacy-16-be = ["chrono/rkyv-16", "rkyv/pointer_width_16", "dep:rkyv07", "rkyv07/size_16", "rkyv07/archive_be"]
+legacy-32-le = ["chrono/rkyv-32", "rkyv/pointer_width_32", "dep:rkyv07", "rkyv07/size_32", "rkyv07/archive_le"]
+legacy-32-be = ["chrono/rkyv-32", "rkyv/pointer_width_32", "dep:rkyv07", "rkyv07/size_32", "rkyv07/archive_be"]
+legacy-64-le = ["chrono/rkyv-64", "rkyv/pointer_width_64", "dep:rkyv07", "rkyv07/size_64", "rkyv07/archive_le"]
+legacy-64-be = ["chrono/rkyv-64", "rkyv/pointer_width_64", "dep:rkyv07", "rkyv07/size_64", "rkyv07/archive_be"]
+
+[dependencies]
+bpaf = { workspace = true, optional = true }
+chrono.workspace = true
+rancor.workspace = true
+rkyv = { workspace = true, features = ["alloc", "bytecheck", "little_endian"] }
+rkyv07 = { workspace = true, optional = true }
+thiserror.workspace = true
+
+[dev-dependencies]
+strict-test-support.workspace = true
+
+[[bin]]
+name = "chrono-rkyv-migrate"
+path = "src/main.rs"
+required-features = ["cli"]

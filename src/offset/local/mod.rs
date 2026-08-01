@@ -6,11 +6,11 @@
 #[cfg(windows)]
 use std::cmp::Ordering;
 
-#[cfg(any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"))]
+#[cfg(feature = "rkyv")]
 use rkyv::Archive;
-#[cfg(any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"))]
+#[cfg(feature = "rkyv")]
 use rkyv::Deserialize;
-#[cfg(any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"))]
+#[cfg(feature = "rkyv")]
 use rkyv::Serialize;
 
 use super::MappedLocalTime;
@@ -125,12 +125,10 @@ mod tz_info;
 /// ```
 #[derive(Copy, Clone, Debug)]
 #[cfg_attr(
-  any(feature = "rkyv", feature = "rkyv-16", feature = "rkyv-32", feature = "rkyv-64"),
+  feature = "rkyv",
   derive(Archive, Deserialize, Serialize),
-  archive(compare(PartialEq)),
-  archive_attr(derive(Clone, Copy, Debug))
+  rkyv(compare(PartialEq), derive(Clone, Copy, Debug))
 )]
-#[cfg_attr(feature = "rkyv-validation", archive(check_bytes))]
 #[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct Local;
@@ -511,11 +509,10 @@ mod tests {
   fn test_rkyv_validation() {
     let local = Local;
     // Local is a ZST and serializes to 0 bytes
-    let bytes = rkyv::to_bytes::<_, 0>(&local).unwrap();
-    assert_eq!(bytes.len(), 0);
+    crate::rkyv_test::inspect_archive(&local, |bytes| assert_eq!(bytes.len(), 0)).unwrap();
 
     // but is deserialized to an archived variant without a
     // wrapping object
-    assert_eq!(rkyv::from_bytes::<Local>(&bytes).unwrap(), super::ArchivedLocal);
+    assert_eq!(crate::rkyv_test::roundtrip(&local).unwrap(), super::ArchivedLocal);
   }
 }

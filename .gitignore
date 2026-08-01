@@ -26,6 +26,8 @@ Cargo.lock
 # Editor / IDE
 .idea/
 .vscode/
+rls*.log
+tarpaulin-report.html
 *.swp
 *.swo
 

@@ -31,21 +31,21 @@ oldtime = []
 wasmbind = ["wasm-bindgen", "js-sys"]
 unstable-locales = ["pure-rust-locales"]
 # Note that rkyv-16, rkyv-32, and rkyv-64 are mutually exclusive.
-rkyv = ["dep:rkyv", "rkyv/size_32"]
-rkyv-16 = ["dep:rkyv", "rkyv?/size_16"]
-rkyv-32 = ["dep:rkyv", "rkyv?/size_32"]
-rkyv-64 = ["dep:rkyv", "rkyv?/size_64"]
-rkyv-validation = ["rkyv?/validation"]
+rkyv = ["dep:rkyv"]
+rkyv-16 = ["rkyv", "rkyv/pointer_width_16"]
+rkyv-32 = ["rkyv", "rkyv/pointer_width_32"]
+rkyv-64 = ["rkyv", "rkyv/pointer_width_64"]
+rkyv-validation = ["rkyv", "rkyv/bytecheck"]
 # Features for internal use only:
 __internal_bench = []
 
 [dependencies]
 num-traits = { version = "0.2", default-features = false }
-serde = { version = "1.0.99", default-features = false, optional = true }
+serde = { version = "1.0.229", default-features = false, optional = true }
 pure-rust-locales = { version = "0.8.2", optional = true }
-rkyv = { version = "0.7.43", optional = true, default-features = false }
-arbitrary = { version = "1.0.0", features = ["derive"], optional = true }
-defmt = { version = "1.0.1", optional = true }
+rkyv = { workspace = true, optional = true }
+arbitrary = { version = "1.4.2", features = ["derive"], optional = true }
+defmt = { version = "1.1.1", optional = true }
 
 [target.'cfg(all(target_family = "wasm", not(any(target_os = "emscripten", target_os = "wasi"))))'.dependencies]
 wasm-bindgen = { version = "0.2", optional = true }
@@ -55,20 +55,20 @@ js-sys = { version = "0.3", optional = true }       # contains FFI bindings for 
 windows-link = { version = "0.2", optional = true }
 
 [target.'cfg(unix)'.dependencies]
-iana-time-zone = { version = "0.1.45", optional = true, features = ["fallback"] }
+iana-time-zone = { version = "0.1.65", optional = true, features = ["fallback"] }
 
 [dev-dependencies]
 serde_json = { version = "1" }
 serde_derive = { version = "1", default-features = false }
 similar-asserts = { version = "2.0.0" }
-bincode = { version = "1.3.0" }
+bincode = { version = "4.0.0", git = "https://github.com/strict-rs/strict-bincode.git", branch = "upgrade" }
 windows-bindgen = { version = "0.66" }                     # MSRV is 1.74
 
 [target.'cfg(all(target_family = "wasm", not(any(target_os = "emscripten", target_os = "wasi"))))'.dev-dependencies]
 wasm-bindgen-test = "0.3"
 
 [package.metadata.docs.rs]
-features = ["arbitrary", "rkyv", "serde", "unstable-locales"]
+features = ["arbitrary", "rkyv", "rkyv-validation", "serde", "unstable-locales"]
 rustdoc-args = ["--cfg", "docsrs"]
 
 [package.metadata.playground]
@@ -77,16 +77,16 @@ features = ["serde"]
 # ─────────────────────────────────────────────────────────────────────────────
 # Workspace (upgrade stage)
 # ─────────────────────────────────────────────────────────────────────────────
-# The `chrono` package above is the workspace root. Only `xtask` is a member and
-# inherits the shared `[workspace.package]` metadata (edition 2024, rust-version
-# 1.97). The upstream chrono helper crates (`bench`, `fuzz`, `ci/core-test`) stay
-# out of the workspace via `exclude`, keeping their own editions and remaining
-# mergeable with `chronotope/chrono`. Strict lint policy, profiles, and patches
-# are intentionally deferred to the later strict stage.
+# The `chrono` package above is the workspace root. `chrono-rkyv-migrate` and
+# `stask` share the workspace version, Rust version, license, authors, and
+# repository metadata; the migration crate retains edition 2021 to isolate
+# `rkyv` 0.7 generated code. The upstream chrono helper crates (`bench`, `fuzz`,
+# `ci/core-test`) stay out of the workspace via `exclude`, keeping their own
+# editions and remaining mergeable with `chronotope/chrono`.
 # ─────────────────────────────────────────────────────────────────────────────
 
 [workspace]
-members  = ["xtask"]
+members  = ["chrono-rkyv-migrate", "stask"]
 exclude  = ["bench", "fuzz", "ci/core-test"]
 resolver = "3"
 
@@ -105,6 +105,12 @@ repository   = "https://github.com/strict-rs/strict-chrono"
 readme       = "README.md"
 
 [workspace.dependencies]
-template-core = { version = "0.1.0", path = "../template-rs/crates/template-core" }
-template-xtask = { version = "0.1.0", path = "../template-rs/crates/template-xtask" }
-strict-test-support = { version = "0.1.0", path = "../strict-test-support-rs/crates/strict-test-support" }
+bpaf = { version = "0.10", git = "https://github.com/strict-rs/strict-bpaf.git", branch = "sync", default-features = false }
+chrono = { path = ".", default-features = false, features = ["clock", "std", "rkyv-validation"] }
+rancor = "0.1"
+rkyv = { version = "0.8.17", default-features = false }
+rkyv07 = { package = "rkyv", version = "=0.7.46", default-features = false, features = ["alloc", "validation"] }
+thiserror = { version = "2", git = "https://github.com/strict-rs/strict-thiserror.git", branch = "upgrade" }
+template-core = { version = "0.3.0", git = "https://github.com/earthlings-dev/template-rs.git", branch = "main"}
+template-stask = { version = "0.3.0", git = "https://github.com/earthlings-dev/template-rs.git", branch = "main"}
+strict-test-support = { version = "0.1.0", git = "https://github.com/earthlings-dev/strict-test-support-rs.git", branch = "main" }
