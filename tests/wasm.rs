@@ -24,7 +24,14 @@ fn now() {
   let now = env!("NOW");
   let actual = NaiveDateTime::parse_from_str(&now, "%s").unwrap().and_utc();
   let diff = utc - actual;
-  assert!(diff < chrono::TimeDelta::try_minutes(5).unwrap(), "expected {} - {} == {} < 5m (env var: {})", utc, actual, diff, now,);
+  assert!(
+    diff < chrono::TimeDelta::try_minutes(5).unwrap(),
+    "expected {} - {} == {} < 5m (env var: {})",
+    utc,
+    actual,
+    diff,
+    now,
+  );
 
   let tz = env!("TZ");
   eprintln!("testing with tz={}", tz);
@@ -38,7 +45,13 @@ fn now() {
     "UTC0" | "+0000" => FixedOffset::east_opt(0).unwrap(),
     tz => panic!("unexpected TZ {}", tz),
   };
-  assert_eq!(&expected_offset, local.offset(), "expected: {:?} local: {:?}", expected_offset, local.offset(),);
+  assert_eq!(
+    &expected_offset,
+    local.offset(),
+    "expected: {:?} local: {:?}",
+    expected_offset,
+    local.offset(),
+  );
 }
 
 #[wasm_bindgen_test]

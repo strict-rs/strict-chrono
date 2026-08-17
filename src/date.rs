@@ -323,11 +323,13 @@ impl<Tz: TimeZone> Date<Tz> {
 
   /// The minimum possible `Date`.
   pub const MIN_UTC: Date<Utc> = Date {
-    date: NaiveDate::MIN, offset: Utc
+    date:   NaiveDate::MIN,
+    offset: Utc,
   };
   /// The maximum possible `Date`.
   pub const MAX_UTC: Date<Utc> = Date {
-    date: NaiveDate::MAX, offset: Utc
+    date:   NaiveDate::MAX,
+    offset: Utc,
   };
 }
 

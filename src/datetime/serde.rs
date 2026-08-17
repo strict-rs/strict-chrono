@@ -231,12 +231,12 @@ pub mod ts_nanoseconds {
   ///
   /// let my_s: S = serde_json::from_str(r#"{ "time": 1526522699918355733 }"#)?;
   /// assert_eq!(my_s, S {
-  ///   time: Utc.timestamp_opt(1526522699, 918355733).unwrap()
+  ///   time: Utc.timestamp_opt(1526522699, 918355733).unwrap(),
   /// });
   ///
   /// let my_s: S = serde_json::from_str(r#"{ "time": -1 }"#)?;
   /// assert_eq!(my_s, S {
-  ///   time: Utc.timestamp_opt(-1, 999_999_999).unwrap()
+  ///   time: Utc.timestamp_opt(-1, 999_999_999).unwrap(),
   /// });
   /// # Ok::<(), serde_json::Error>(())
   /// ```
@@ -384,7 +384,7 @@ pub mod ts_nanoseconds_option {
   ///
   /// let my_s: S = serde_json::from_str(r#"{ "time": 1526522699918355733 }"#)?;
   /// assert_eq!(my_s, S {
-  ///   time: Utc.timestamp_opt(1526522699, 918355733).single()
+  ///   time: Utc.timestamp_opt(1526522699, 918355733).single(),
   /// });
   /// # Ok::<(), serde_json::Error>(())
   /// ```
@@ -524,12 +524,12 @@ pub mod ts_microseconds {
   ///
   /// let my_s: S = serde_json::from_str(r#"{ "time": 1526522699918355 }"#)?;
   /// assert_eq!(my_s, S {
-  ///   time: Utc.timestamp_opt(1526522699, 918355000).unwrap()
+  ///   time: Utc.timestamp_opt(1526522699, 918355000).unwrap(),
   /// });
   ///
   /// let my_s: S = serde_json::from_str(r#"{ "time": -1 }"#)?;
   /// assert_eq!(my_s, S {
-  ///   time: Utc.timestamp_opt(-1, 999_999_000).unwrap()
+  ///   time: Utc.timestamp_opt(-1, 999_999_000).unwrap(),
   /// });
   /// # Ok::<(), serde_json::Error>(())
   /// ```
@@ -665,7 +665,7 @@ pub mod ts_microseconds_option {
   ///
   /// let my_s: S = serde_json::from_str(r#"{ "time": 1526522699918355 }"#)?;
   /// assert_eq!(my_s, S {
-  ///   time: Utc.timestamp_opt(1526522699, 918355000).single()
+  ///   time: Utc.timestamp_opt(1526522699, 918355000).single(),
   /// });
   /// # Ok::<(), serde_json::Error>(())
   /// ```
@@ -805,12 +805,12 @@ pub mod ts_milliseconds {
   ///
   /// let my_s: S = serde_json::from_str(r#"{ "time": 1526522699918 }"#)?;
   /// assert_eq!(my_s, S {
-  ///   time: Utc.timestamp_opt(1526522699, 918000000).unwrap()
+  ///   time: Utc.timestamp_opt(1526522699, 918000000).unwrap(),
   /// });
   ///
   /// let my_s: S = serde_json::from_str(r#"{ "time": -1 }"#)?;
   /// assert_eq!(my_s, S {
-  ///   time: Utc.timestamp_opt(-1, 999_000_000).unwrap()
+  ///   time: Utc.timestamp_opt(-1, 999_000_000).unwrap(),
   /// });
   /// # Ok::<(), serde_json::Error>(())
   /// ```
@@ -955,7 +955,7 @@ pub mod ts_milliseconds_option {
   /// assert_eq!(
   ///   my_s,
   ///   E::V(S {
-  ///     time: Some(Utc.timestamp_opt(1526522699, 918000000).unwrap())
+  ///     time: Some(Utc.timestamp_opt(1526522699, 918000000).unwrap()),
   ///   })
   /// );
   /// let s: E<S> = serde_json::from_str(r#"{ "time": null }"#)?;
@@ -1072,7 +1072,7 @@ pub mod ts_seconds {
   /// }
   ///
   /// let my_s = S {
-  ///   time: Utc.with_ymd_and_hms(2015, 5, 15, 10, 0, 0).unwrap()
+  ///   time: Utc.with_ymd_and_hms(2015, 5, 15, 10, 0, 0).unwrap(),
   /// };
   /// let as_string = serde_json::to_string(&my_s)?;
   /// assert_eq!(as_string, r#"{"time":1431684000}"#);
@@ -1103,7 +1103,7 @@ pub mod ts_seconds {
   ///
   /// let my_s: S = serde_json::from_str(r#"{ "time": 1431684000 }"#)?;
   /// assert_eq!(my_s, S {
-  ///   time: Utc.timestamp_opt(1431684000, 0).unwrap()
+  ///   time: Utc.timestamp_opt(1431684000, 0).unwrap(),
   /// });
   /// # Ok::<(), serde_json::Error>(())
   /// ```
@@ -1197,7 +1197,7 @@ pub mod ts_seconds_option {
   /// }
   ///
   /// let my_s = S {
-  ///   time: Some(Utc.with_ymd_and_hms(2015, 5, 15, 10, 0, 0).unwrap())
+  ///   time: Some(Utc.with_ymd_and_hms(2015, 5, 15, 10, 0, 0).unwrap()),
   /// };
   /// let as_string = serde_json::to_string(&my_s)?;
   /// assert_eq!(as_string, r#"{"time":1431684000}"#);
@@ -1231,7 +1231,7 @@ pub mod ts_seconds_option {
   ///
   /// let my_s: S = serde_json::from_str(r#"{ "time": 1431684000 }"#)?;
   /// assert_eq!(my_s, S {
-  ///   time: Utc.timestamp_opt(1431684000, 0).single()
+  ///   time: Utc.timestamp_opt(1431684000, 0).single(),
   /// });
   /// # Ok::<(), serde_json::Error>(())
   /// ```

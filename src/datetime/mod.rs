@@ -238,7 +238,10 @@ impl<Tz: TimeZone> DateTime<Tz> {
   /// let dt: DateTime<Utc> = Utc.with_ymd_and_hms(2015, 5, 15, 0, 0, 0).unwrap();
   /// assert_eq!(dt.timestamp(), 1431648000);
   ///
-  /// assert_eq!(DateTime::from_timestamp(dt.timestamp(), dt.timestamp_subsec_nanos()).unwrap(), dt);
+  /// assert_eq!(
+  ///   DateTime::from_timestamp(dt.timestamp(), dt.timestamp_subsec_nanos()).unwrap(),
+  ///   dt
+  /// );
   /// ```
   #[inline]
   #[must_use]
@@ -323,7 +326,10 @@ impl<Tz: TimeZone> DateTime<Tz> {
   #[inline]
   #[must_use]
   pub const fn timestamp_nanos(&self) -> i64 {
-    expect(self.timestamp_nanos_opt(), "value can not be represented in a timestamp with nanosecond precision.")
+    expect(
+      self.timestamp_nanos_opt(),
+      "value can not be represented in a timestamp with nanosecond precision.",
+    )
   }
 
   /// Returns the number of non-leap-nanoseconds since January 1, 1970 UTC.
@@ -472,7 +478,8 @@ impl<Tz: TimeZone> DateTime<Tz> {
   #[must_use]
   pub const fn to_utc(&self) -> DateTime<Utc> {
     DateTime {
-      datetime: self.datetime, offset: Utc
+      datetime: self.datetime,
+      offset:   Utc,
     }
   }
 
@@ -703,9 +710,18 @@ impl<Tz: TimeZone> DateTime<Tz> {
   ///   .and_hms_micro_opt(18, 30, 9, 453_829)
   ///   .unwrap()
   ///   .and_utc();
-  /// assert_eq!(dt.to_rfc3339_opts(SecondsFormat::Millis, false), "2018-01-26T18:30:09.453+00:00");
-  /// assert_eq!(dt.to_rfc3339_opts(SecondsFormat::Millis, true), "2018-01-26T18:30:09.453Z");
-  /// assert_eq!(dt.to_rfc3339_opts(SecondsFormat::Secs, true), "2018-01-26T18:30:09Z");
+  /// assert_eq!(
+  ///   dt.to_rfc3339_opts(SecondsFormat::Millis, false),
+  ///   "2018-01-26T18:30:09.453+00:00"
+  /// );
+  /// assert_eq!(
+  ///   dt.to_rfc3339_opts(SecondsFormat::Millis, true),
+  ///   "2018-01-26T18:30:09.453Z"
+  /// );
+  /// assert_eq!(
+  ///   dt.to_rfc3339_opts(SecondsFormat::Secs, true),
+  ///   "2018-01-26T18:30:09Z"
+  /// );
   ///
   /// let pst = FixedOffset::east_opt(8 * 60 * 60).unwrap();
   /// let dt = pst
@@ -716,7 +732,10 @@ impl<Tz: TimeZone> DateTime<Tz> {
   ///       .unwrap(),
   ///   )
   ///   .unwrap();
-  /// assert_eq!(dt.to_rfc3339_opts(SecondsFormat::Secs, true), "2018-01-26T10:30:09+08:00");
+  /// assert_eq!(
+  ///   dt.to_rfc3339_opts(SecondsFormat::Secs, true),
+  ///   "2018-01-26T10:30:09+08:00"
+  /// );
   /// ```
   #[cfg(feature = "alloc")]
   #[must_use]
@@ -758,11 +777,13 @@ impl<Tz: TimeZone> DateTime<Tz> {
 
   /// The minimum possible `DateTime<Utc>`.
   pub const MIN_UTC: DateTime<Utc> = DateTime {
-    datetime: NaiveDateTime::MIN, offset: Utc
+    datetime: NaiveDateTime::MIN,
+    offset:   Utc,
   };
   /// The maximum possible `DateTime<Utc>`.
   pub const MAX_UTC: DateTime<Utc> = DateTime {
-    datetime: NaiveDateTime::MAX, offset: Utc
+    datetime: NaiveDateTime::MAX,
+    offset:   Utc,
   };
 }
 
@@ -849,7 +870,10 @@ impl DateTime<Utc> {
   /// let dt = DateTime::from_timestamp(1431648000, 0).expect("invalid timestamp");
   ///
   /// assert_eq!(dt.to_string(), "2015-05-15 00:00:00 UTC");
-  /// assert_eq!(DateTime::from_timestamp(dt.timestamp(), dt.timestamp_subsec_nanos()).unwrap(), dt);
+  /// assert_eq!(
+  ///   DateTime::from_timestamp(dt.timestamp(), dt.timestamp_subsec_nanos()).unwrap(),
+  ///   dt
+  /// );
   /// ```
   #[inline]
   #[must_use]
@@ -885,7 +909,10 @@ impl DateTime<Utc> {
   /// let dt = DateTime::from_timestamp_millis(947638923004).expect("invalid timestamp");
   ///
   /// assert_eq!(dt.to_string(), "2000-01-12 01:02:03.004 UTC");
-  /// assert_eq!(DateTime::from_timestamp_millis(dt.timestamp_millis()).unwrap(), dt);
+  /// assert_eq!(
+  ///   DateTime::from_timestamp_millis(dt.timestamp_millis()).unwrap(),
+  ///   dt
+  /// );
   /// ```
   #[inline]
   #[must_use]
@@ -916,13 +943,19 @@ impl DateTime<Utc> {
   /// let timestamp_micros: i64 = 1662921288000000; // Sun, 11 Sep 2022 18:34:48 UTC
   /// let dt = DateTime::from_timestamp_micros(timestamp_micros);
   /// assert!(dt.is_some());
-  /// assert_eq!(timestamp_micros, dt.expect("invalid timestamp").timestamp_micros());
+  /// assert_eq!(
+  ///   timestamp_micros,
+  ///   dt.expect("invalid timestamp").timestamp_micros()
+  /// );
   ///
   /// // Negative timestamps (before the UNIX epoch) are supported as well.
   /// let timestamp_micros: i64 = -2208936075000000; // Mon, 1 Jan 1900 14:38:45 UTC
   /// let dt = DateTime::from_timestamp_micros(timestamp_micros);
   /// assert!(dt.is_some());
-  /// assert_eq!(timestamp_micros, dt.expect("invalid timestamp").timestamp_micros());
+  /// assert_eq!(
+  ///   timestamp_micros,
+  ///   dt.expect("invalid timestamp").timestamp_micros()
+  /// );
   /// ```
   #[inline]
   #[must_use]

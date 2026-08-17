@@ -1,3 +1,5 @@
+<!-- Do not edit; generated file. -->
+
 [Chrono][docsrs]: Timezone-aware date and time handling
 ========================================
 

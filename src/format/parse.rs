@@ -689,14 +689,20 @@ mod tests {
     parses(" \n\t", &[Space(" \t\n")]);
     parses("\u{2002}", &[Space("\u{2002}")]);
     // most unicode whitespace characters
-    parses("\u{00A0}\u{1680}\u{2000}\u{2001}\u{2002}\u{2003}\u{2004}\u{2005}\u{2006}\u{2007}\u{2008}\u{2009}\u{3000}", &[Space(
+    parses(
       "\u{00A0}\u{1680}\u{2000}\u{2001}\u{2002}\u{2003}\u{2004}\u{2005}\u{2006}\u{2007}\u{2008}\u{2009}\u{3000}",
-    )]);
+      &[Space(
+        "\u{00A0}\u{1680}\u{2000}\u{2001}\u{2002}\u{2003}\u{2004}\u{2005}\u{2006}\u{2007}\u{2008}\u{2009}\u{3000}",
+      )],
+    );
     // most unicode whitespace characters
-    parses("\u{00A0}\u{1680}\u{2000}\u{2001}\u{2002}\u{2003}\u{2004}\u{2005}\u{2006}\u{2007}\u{2008}\u{2009}\u{3000}", &[
-      Space("\u{00A0}\u{1680}\u{2000}\u{2001}\u{2002}\u{2003}\u{2004}"),
-      Space("\u{2005}\u{2006}\u{2007}\u{2008}\u{2009}\u{3000}"),
-    ]);
+    parses(
+      "\u{00A0}\u{1680}\u{2000}\u{2001}\u{2002}\u{2003}\u{2004}\u{2005}\u{2006}\u{2007}\u{2008}\u{2009}\u{3000}",
+      &[
+        Space("\u{00A0}\u{1680}\u{2000}\u{2001}\u{2002}\u{2003}\u{2004}"),
+        Space("\u{2005}\u{2006}\u{2007}\u{2008}\u{2009}\u{3000}"),
+      ],
+    );
     check("a", &[Space("")], Err(TOO_LONG));
     check("a", &[Space(" ")], Err(TOO_LONG));
     // a Space containing a literal does not match a literal
@@ -756,7 +762,13 @@ mod tests {
     parses("a\n", &[Literal("a"), Space("\n")]);
     parses("\tab\n", &[Space("\t"), Literal("ab"), Space("\n")]);
     parses("ab\tcd\ne", &[Literal("ab"), Space("\t"), Literal("cd"), Space("\n"), Literal("e")]);
-    parses("+1ab\tcd\r\n+,.", &[Literal("+1ab"), Space("\t"), Literal("cd"), Space("\r\n"), Literal("+,.")]);
+    parses("+1ab\tcd\r\n+,.", &[
+      Literal("+1ab"),
+      Space("\t"),
+      Literal("cd"),
+      Space("\r\n"),
+      Literal("+,."),
+    ]);
     // whitespace and literals can be intermixed
     parses("a\tb", &[Literal("a\tb")]);
     parses("a\tb", &[Literal("a"), Space("\t"), Literal("b")]);
@@ -797,8 +809,16 @@ mod tests {
     check("1234 x 1234", &[num(Year), Literal("x"), num(Year)], Err(INVALID));
     check("1234xx1234", &[num(Year), Literal("x"), num(Year)], Err(INVALID));
     check("1234xx1234", &[num(Year), Literal("xx"), num(Year)], parsed!(year: 1234));
-    check("1234 x 1234", &[num(Year), Space(" "), Literal("x"), Space(" "), num(Year)], parsed!(year: 1234));
-    check("1234 x 1235", &[num(Year), Space(" "), Literal("x"), Space(" "), Literal("1235")], parsed!(year: 1234));
+    check(
+      "1234 x 1234",
+      &[num(Year), Space(" "), Literal("x"), Space(" "), num(Year)],
+      parsed!(year: 1234),
+    );
+    check(
+      "1234 x 1235",
+      &[num(Year), Space(" "), Literal("x"), Space(" "), Literal("1235")],
+      parsed!(year: 1234),
+    );
 
     // signed numeric
     check("-42", &[num(Year)], parsed!(year: -42));
@@ -1009,9 +1029,21 @@ mod tests {
     check("42", &[internal_fixed(Nanosecond3NoDot)], Err(TOO_SHORT));
     check("421", &[internal_fixed(Nanosecond3NoDot)], parsed!(nanosecond: 421_000_000));
     check("4210", &[internal_fixed(Nanosecond3NoDot)], Err(TOO_LONG));
-    check("42143", &[internal_fixed(Nanosecond3NoDot), num(Second)], parsed!(nanosecond: 421_000_000, second: 43));
-    check("421🤠", &[internal_fixed(Nanosecond3NoDot), Literal("🤠")], parsed!(nanosecond: 421_000_000));
-    check("🤠421", &[Literal("🤠"), internal_fixed(Nanosecond3NoDot)], parsed!(nanosecond: 421_000_000));
+    check(
+      "42143",
+      &[internal_fixed(Nanosecond3NoDot), num(Second)],
+      parsed!(nanosecond: 421_000_000, second: 43),
+    );
+    check(
+      "421🤠",
+      &[internal_fixed(Nanosecond3NoDot), Literal("🤠")],
+      parsed!(nanosecond: 421_000_000),
+    );
+    check(
+      "🤠421",
+      &[Literal("🤠"), internal_fixed(Nanosecond3NoDot)],
+      parsed!(nanosecond: 421_000_000),
+    );
     check("42195", &[internal_fixed(Nanosecond3NoDot)], Err(TOO_LONG));
     check("123456789", &[internal_fixed(Nanosecond3NoDot)], Err(TOO_LONG));
     check("4x", &[internal_fixed(Nanosecond3NoDot)], Err(TOO_SHORT));
@@ -1038,7 +1070,11 @@ mod tests {
     check("12345678", &[internal_fixed(Nanosecond9NoDot)], Err(TOO_SHORT));
     check("421950803", &[internal_fixed(Nanosecond9NoDot)], parsed!(nanosecond: 421_950_803));
     check("000000003", &[internal_fixed(Nanosecond9NoDot)], parsed!(nanosecond: 3));
-    check("42195080354", &[internal_fixed(Nanosecond9NoDot), num(Second)], parsed!(nanosecond: 421_950_803, second: 54)); // don't skip digits that come after the 9
+    check(
+      "42195080354",
+      &[internal_fixed(Nanosecond9NoDot), num(Second)],
+      parsed!(nanosecond: 421_950_803, second: 54),
+    ); // don't skip digits that come after the 9
     check("1234567890", &[internal_fixed(Nanosecond9NoDot)], Err(TOO_LONG));
     check("000000000", &[internal_fixed(Nanosecond9NoDot)], parsed!(nanosecond: 0));
     check("00000000x", &[internal_fixed(Nanosecond9NoDot)], Err(INVALID));
@@ -1125,8 +1161,16 @@ mod tests {
     check(" 12:34", &[fixed(TimezoneOffset)], Err(INVALID));
     check("", &[fixed(TimezoneOffset)], Err(TOO_SHORT));
     check("+", &[fixed(TimezoneOffset)], Err(TOO_SHORT));
-    check("+12345", &[fixed(TimezoneOffset), num(Numeric::Day)], parsed!(offset: 45_240, day: 5));
-    check("+12:345", &[fixed(TimezoneOffset), num(Numeric::Day)], parsed!(offset: 45_240, day: 5));
+    check(
+      "+12345",
+      &[fixed(TimezoneOffset), num(Numeric::Day)],
+      parsed!(offset: 45_240, day: 5),
+    );
+    check(
+      "+12:345",
+      &[fixed(TimezoneOffset), num(Numeric::Day)],
+      parsed!(offset: 45_240, day: 5),
+    );
     check("+12:34:", &[fixed(TimezoneOffset), Literal(":")], parsed!(offset: 45_240));
     check("Z12:34", &[fixed(TimezoneOffset)], Err(INVALID));
     check("X12:34", &[fixed(TimezoneOffset)], Err(INVALID));
@@ -1224,8 +1268,16 @@ mod tests {
     check("", &[fixed(TimezoneOffsetColon)], Err(TOO_SHORT));
     check("+", &[fixed(TimezoneOffsetColon)], Err(TOO_SHORT));
     check(":", &[fixed(TimezoneOffsetColon)], Err(INVALID));
-    check("+12345", &[fixed(TimezoneOffsetColon), num(Numeric::Day)], parsed!(offset: 45_240, day: 5));
-    check("+12:345", &[fixed(TimezoneOffsetColon), num(Numeric::Day)], parsed!(offset: 45_240, day: 5));
+    check(
+      "+12345",
+      &[fixed(TimezoneOffsetColon), num(Numeric::Day)],
+      parsed!(offset: 45_240, day: 5),
+    );
+    check(
+      "+12:345",
+      &[fixed(TimezoneOffsetColon), num(Numeric::Day)],
+      parsed!(offset: 45_240, day: 5),
+    );
     check("+12:34:", &[fixed(TimezoneOffsetColon), Literal(":")], parsed!(offset: 45_240));
     check("Z", &[fixed(TimezoneOffsetColon)], Err(INVALID));
     check("A", &[fixed(TimezoneOffsetColon)], Err(INVALID));
@@ -1298,8 +1350,16 @@ mod tests {
     check("+12:34 ", &[fixed(TimezoneOffsetZ)], Err(TOO_LONG));
     check("+12 34 ", &[fixed(TimezoneOffsetZ)], Err(TOO_LONG));
     check(" +12:34", &[fixed(TimezoneOffsetZ)], parsed!(offset: 45_240));
-    check("+12345", &[fixed(TimezoneOffsetZ), num(Numeric::Day)], parsed!(offset: 45_240, day: 5));
-    check("+12:345", &[fixed(TimezoneOffsetZ), num(Numeric::Day)], parsed!(offset: 45_240, day: 5));
+    check(
+      "+12345",
+      &[fixed(TimezoneOffsetZ), num(Numeric::Day)],
+      parsed!(offset: 45_240, day: 5),
+    );
+    check(
+      "+12:345",
+      &[fixed(TimezoneOffsetZ), num(Numeric::Day)],
+      parsed!(offset: 45_240, day: 5),
+    );
     check("+12:34:", &[fixed(TimezoneOffsetZ), Literal(":")], parsed!(offset: 45_240));
     check("Z12:34", &[fixed(TimezoneOffsetZ)], Err(TOO_LONG));
     check("X12:34", &[fixed(TimezoneOffsetZ)], Err(INVALID));
@@ -1393,14 +1453,34 @@ mod tests {
     check(" +12:34", &[internal_fixed(TimezoneOffsetPermissive)], parsed!(offset: 45_240));
     check(" -12:34", &[internal_fixed(TimezoneOffsetPermissive)], parsed!(offset: -45_240));
     check(" −12:34", &[internal_fixed(TimezoneOffsetPermissive)], parsed!(offset: -45_240)); // MINUS SIGN (U+2212)
-    check("+12345", &[internal_fixed(TimezoneOffsetPermissive), num(Numeric::Day)], parsed!(offset: 45_240, day: 5));
-    check("+12:345", &[internal_fixed(TimezoneOffsetPermissive), num(Numeric::Day)], parsed!(offset: 45_240, day: 5));
-    check("+12:34:", &[internal_fixed(TimezoneOffsetPermissive), Literal(":")], parsed!(offset: 45_240));
+    check(
+      "+12345",
+      &[internal_fixed(TimezoneOffsetPermissive), num(Numeric::Day)],
+      parsed!(offset: 45_240, day: 5),
+    );
+    check(
+      "+12:345",
+      &[internal_fixed(TimezoneOffsetPermissive), num(Numeric::Day)],
+      parsed!(offset: 45_240, day: 5),
+    );
+    check(
+      "+12:34:",
+      &[internal_fixed(TimezoneOffsetPermissive), Literal(":")],
+      parsed!(offset: 45_240),
+    );
     check("🤠+12:34", &[internal_fixed(TimezoneOffsetPermissive)], Err(INVALID));
     check("+12:34🤠", &[internal_fixed(TimezoneOffsetPermissive)], Err(TOO_LONG));
     check("+12:🤠34", &[internal_fixed(TimezoneOffsetPermissive)], Err(INVALID));
-    check("+12:34🤠", &[internal_fixed(TimezoneOffsetPermissive), Literal("🤠")], parsed!(offset: 45_240));
-    check("🤠+12:34", &[Literal("🤠"), internal_fixed(TimezoneOffsetPermissive)], parsed!(offset: 45_240));
+    check(
+      "+12:34🤠",
+      &[internal_fixed(TimezoneOffsetPermissive), Literal("🤠")],
+      parsed!(offset: 45_240),
+    );
+    check(
+      "🤠+12:34",
+      &[Literal("🤠"), internal_fixed(TimezoneOffsetPermissive)],
+      parsed!(offset: 45_240),
+    );
     check("Z", &[internal_fixed(TimezoneOffsetPermissive)], parsed!(offset: 0));
     check("A", &[internal_fixed(TimezoneOffsetPermissive)], Err(INVALID));
     check("PST", &[internal_fixed(TimezoneOffsetPermissive)], Err(INVALID));
@@ -1607,11 +1687,21 @@ mod tests {
       ("Tue, 20 Jan 2015 17:35:20 -0800", Ok(ymd_hmsn(2015, 1, 20, 17, 35, 20, 0, -8))), // normal case
       ("Fri,  2 Jan 2015 17:35:20 -0800", Ok(ymd_hmsn(2015, 1, 2, 17, 35, 20, 0, -8))),  // folding whitespace
       ("Fri, 02 Jan 2015 17:35:20 -0800", Ok(ymd_hmsn(2015, 1, 2, 17, 35, 20, 0, -8))),  // leading zero
-      ("Tue, 20 Jan 2015 17:35:20 -0800 (UTC)", Ok(ymd_hmsn(2015, 1, 20, 17, 35, 20, 0, -8))), // trailing comment
-      (r"Tue, 20 Jan 2015 17:35:20 -0800 ( (UTC ) (\( (a)\(( \t ) ) \\( \) ))", Ok(ymd_hmsn(2015, 1, 20, 17, 35, 20, 0, -8))), /* complex trailing comment */
-      (r"Tue, 20 Jan 2015 17:35:20 -0800 (UTC\)", Err(TOO_LONG)), // incorrect comment, not enough closing parentheses
-      ("Tue, 20 Jan 2015 17:35:20 -0800 (UTC)\t \r\n(Anothercomment)", Ok(ymd_hmsn(2015, 1, 20, 17, 35, 20, 0, -8))), // multiple comments
-      ("Tue, 20 Jan 2015 17:35:20 -0800 (UTC) ", Err(TOO_LONG)),  // trailing whitespace after comment
+      (
+        "Tue, 20 Jan 2015 17:35:20 -0800 (UTC)",
+        Ok(ymd_hmsn(2015, 1, 20, 17, 35, 20, 0, -8)),
+      ), // trailing comment
+      (
+        r"Tue, 20 Jan 2015 17:35:20 -0800 ( (UTC ) (\( (a)\(( \t ) ) \\( \) ))",
+        Ok(ymd_hmsn(2015, 1, 20, 17, 35, 20, 0, -8)),
+      ), // complex trailing comment
+      (r"Tue, 20 Jan 2015 17:35:20 -0800 (UTC\)", Err(TOO_LONG)),                        /* incorrect comment, not enough closing
+                                                                                          * parentheses */
+      (
+        "Tue, 20 Jan 2015 17:35:20 -0800 (UTC)\t \r\n(Anothercomment)",
+        Ok(ymd_hmsn(2015, 1, 20, 17, 35, 20, 0, -8)),
+      ), // multiple comments
+      ("Tue, 20 Jan 2015 17:35:20 -0800 (UTC) ", Err(TOO_LONG)), // trailing whitespace after comment
       ("20 Jan 2015 17:35:20 -0800", Ok(ymd_hmsn(2015, 1, 20, 17, 35, 20, 0, -8))), // no day of week
       ("20 JAN 2015 17:35:20 -0800", Ok(ymd_hmsn(2015, 1, 20, 17, 35, 20, 0, -8))), // upper case month
       ("Tue, 20 Jan 2015 17:35 -0800", Ok(ymd_hmsn(2015, 1, 20, 17, 35, 0, 0, -8))), // no second
@@ -1689,17 +1779,38 @@ mod tests {
     assert_eq!(dt.format(RFC850_FMT).to_string(), "Sunday, 06-Nov-94 08:49:37 GMT");
 
     // Check that it parses correctly
-    assert_eq!(NaiveDateTime::parse_from_str("Sunday, 06-Nov-94 08:49:37 GMT", RFC850_FMT), Ok(dt.naive_utc()));
+    assert_eq!(
+      NaiveDateTime::parse_from_str("Sunday, 06-Nov-94 08:49:37 GMT", RFC850_FMT),
+      Ok(dt.naive_utc())
+    );
 
     // Check that the rest of the weekdays parse correctly (this test originally failed because
     // Sunday parsed incorrectly).
     let testdates = [
-      (Utc.with_ymd_and_hms(1994, 11, 7, 8, 49, 37).unwrap(), "Monday, 07-Nov-94 08:49:37 GMT"),
-      (Utc.with_ymd_and_hms(1994, 11, 8, 8, 49, 37).unwrap(), "Tuesday, 08-Nov-94 08:49:37 GMT"),
-      (Utc.with_ymd_and_hms(1994, 11, 9, 8, 49, 37).unwrap(), "Wednesday, 09-Nov-94 08:49:37 GMT"),
-      (Utc.with_ymd_and_hms(1994, 11, 10, 8, 49, 37).unwrap(), "Thursday, 10-Nov-94 08:49:37 GMT"),
-      (Utc.with_ymd_and_hms(1994, 11, 11, 8, 49, 37).unwrap(), "Friday, 11-Nov-94 08:49:37 GMT"),
-      (Utc.with_ymd_and_hms(1994, 11, 12, 8, 49, 37).unwrap(), "Saturday, 12-Nov-94 08:49:37 GMT"),
+      (
+        Utc.with_ymd_and_hms(1994, 11, 7, 8, 49, 37).unwrap(),
+        "Monday, 07-Nov-94 08:49:37 GMT",
+      ),
+      (
+        Utc.with_ymd_and_hms(1994, 11, 8, 8, 49, 37).unwrap(),
+        "Tuesday, 08-Nov-94 08:49:37 GMT",
+      ),
+      (
+        Utc.with_ymd_and_hms(1994, 11, 9, 8, 49, 37).unwrap(),
+        "Wednesday, 09-Nov-94 08:49:37 GMT",
+      ),
+      (
+        Utc.with_ymd_and_hms(1994, 11, 10, 8, 49, 37).unwrap(),
+        "Thursday, 10-Nov-94 08:49:37 GMT",
+      ),
+      (
+        Utc.with_ymd_and_hms(1994, 11, 11, 8, 49, 37).unwrap(),
+        "Friday, 11-Nov-94 08:49:37 GMT",
+      ),
+      (
+        Utc.with_ymd_and_hms(1994, 11, 12, 8, 49, 37).unwrap(),
+        "Saturday, 12-Nov-94 08:49:37 GMT",
+      ),
     ];
 
     for val in &testdates {
@@ -1743,13 +1854,28 @@ mod tests {
       ("2015-01-20T17:35:20−08:00", Ok(ymd_hmsn(2015, 1, 20, 17, 35, 20, 0, -8))), // normal case with MINUS SIGN (U+2212)
       ("1944-06-06T04:04:00Z", Ok(ymd_hmsn(1944, 6, 6, 4, 4, 0, 0, 0))),           // D-day
       ("2001-09-11T09:45:00-08:00", Ok(ymd_hmsn(2001, 9, 11, 9, 45, 0, 0, -8))),
-      ("2015-01-20T17:35:20.001-08:00", Ok(ymd_hmsn(2015, 1, 20, 17, 35, 20, 1_000_000, -8))),
-      ("2015-01-20T17:35:20.001−08:00", Ok(ymd_hmsn(2015, 1, 20, 17, 35, 20, 1_000_000, -8))), // with MINUS SIGN (U+2212)
-      ("2015-01-20T17:35:20.000031-08:00", Ok(ymd_hmsn(2015, 1, 20, 17, 35, 20, 31_000, -8))),
+      (
+        "2015-01-20T17:35:20.001-08:00",
+        Ok(ymd_hmsn(2015, 1, 20, 17, 35, 20, 1_000_000, -8)),
+      ),
+      (
+        "2015-01-20T17:35:20.001−08:00",
+        Ok(ymd_hmsn(2015, 1, 20, 17, 35, 20, 1_000_000, -8)),
+      ), // with MINUS SIGN (U+2212)
+      (
+        "2015-01-20T17:35:20.000031-08:00",
+        Ok(ymd_hmsn(2015, 1, 20, 17, 35, 20, 31_000, -8)),
+      ),
       ("2015-01-20T17:35:20.000000004-08:00", Ok(ymd_hmsn(2015, 1, 20, 17, 35, 20, 4, -8))),
       ("2015-01-20T17:35:20.000000004−08:00", Ok(ymd_hmsn(2015, 1, 20, 17, 35, 20, 4, -8))), // with MINUS SIGN (U+2212)
-      ("2015-01-20T17:35:20.000000000452-08:00", Ok(ymd_hmsn(2015, 1, 20, 17, 35, 20, 0, -8))), // too small
-      ("2015-01-20T17:35:20.000000000452−08:00", Ok(ymd_hmsn(2015, 1, 20, 17, 35, 20, 0, -8))), // too small with MINUS SIGN (U+2212)
+      (
+        "2015-01-20T17:35:20.000000000452-08:00",
+        Ok(ymd_hmsn(2015, 1, 20, 17, 35, 20, 0, -8)),
+      ), // too small
+      (
+        "2015-01-20T17:35:20.000000000452−08:00",
+        Ok(ymd_hmsn(2015, 1, 20, 17, 35, 20, 0, -8)),
+      ), // too small with MINUS SIGN (U+2212)
       ("2023-11-05T01:30:00-04:00", Ok(ymd_hmsn(2023, 11, 5, 1, 30, 0, 0, -4))),             // ambiguous timestamp
       ("2015-01-20 17:35:20-08:00", Ok(ymd_hmsn(2015, 1, 20, 17, 35, 20, 0, -8))),           // without 'T'
       ("2015-01-20_17:35:20-08:00", Err(INVALID)),                                           // wrong date time separator

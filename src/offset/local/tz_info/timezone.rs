@@ -136,7 +136,10 @@ impl TimeZone {
   /// Construct the time zone associated to UTC
   pub(crate) fn utc() -> Self {
     Self {
-      transitions: Vec::new(), local_time_types: vec![LocalTimeType::UTC], leap_seconds: Vec::new(), extra_rule: None
+      transitions:      Vec::new(),
+      local_time_types: vec![LocalTimeType::UTC],
+      leap_seconds:     Vec::new(),
+      extra_rule:       None,
     }
   }
 
@@ -443,10 +446,12 @@ impl<'a> TimeZoneRef<'a> {
   }
 
   /// The UTC time zone
-  const UTC: TimeZoneRef<'static> =
-    TimeZoneRef {
-      transitions: &[], local_time_types: &[LocalTimeType::UTC], leap_seconds: &[], extra_rule: &None
-    };
+  const UTC: TimeZoneRef<'static> = TimeZoneRef {
+    transitions:      &[],
+    local_time_types: &[LocalTimeType::UTC],
+    leap_seconds:     &[],
+    extra_rule:       &None,
+  };
 }
 
 /// Transition of a TZif file
@@ -630,7 +635,9 @@ impl LocalTimeType {
   }
 
   pub(super) const UTC: LocalTimeType = Self {
-    ut_offset: 0, is_dst: false, name: None
+    ut_offset: 0,
+    is_dst:    false,
+    name:      None,
   };
 }
 
@@ -688,8 +695,14 @@ mod tests {
 
   #[test]
   fn test_error() -> Result<(), Error> {
-    assert!(matches!(TransitionRule::from_tz_string(b"IST-1GMT0", false), Err(Error::UnsupportedTzString(_))));
-    assert!(matches!(TransitionRule::from_tz_string(b"EET-2EEST", false), Err(Error::UnsupportedTzString(_))));
+    assert!(matches!(
+      TransitionRule::from_tz_string(b"IST-1GMT0", false),
+      Err(Error::UnsupportedTzString(_))
+    ));
+    assert!(matches!(
+      TransitionRule::from_tz_string(b"EET-2EEST", false),
+      Err(Error::UnsupportedTzString(_))
+    ));
 
     Ok(())
   }
@@ -770,8 +783,14 @@ mod tests {
 
     assert_eq!(time_zone, time_zone_result);
 
-    assert_eq!(*time_zone.find_local_time_type(-1156939200)?, LocalTimeType::new(-34200, true, Some(b"HDT"))?);
-    assert_eq!(*time_zone.find_local_time_type(1546300800)?, LocalTimeType::new(-36000, false, Some(b"HST"))?);
+    assert_eq!(
+      *time_zone.find_local_time_type(-1156939200)?,
+      LocalTimeType::new(-34200, true, Some(b"HDT"))?
+    );
+    assert_eq!(
+      *time_zone.find_local_time_type(1546300800)?,
+      LocalTimeType::new(-36000, false, Some(b"HST"))?
+    );
 
     Ok(())
   }
@@ -796,8 +815,14 @@ mod tests {
 
     assert_eq!(time_zone, time_zone_result);
 
-    assert_eq!(*time_zone.find_local_time_type(-1500000000)?, LocalTimeType::new(-18840, false, Some(b"QMT"))?);
-    assert_eq!(*time_zone.find_local_time_type(0)?, LocalTimeType::new(-18000, false, Some(b"ECT"))?);
+    assert_eq!(
+      *time_zone.find_local_time_type(-1500000000)?,
+      LocalTimeType::new(-18840, false, Some(b"QMT"))?
+    );
+    assert_eq!(
+      *time_zone.find_local_time_type(0)?,
+      LocalTimeType::new(-18000, false, Some(b"ECT"))?
+    );
 
     Ok(())
   }
@@ -840,8 +865,12 @@ mod tests {
     let time_zone_1 = TimeZone::new(vec![], utc_local_time_types.clone(), vec![], None)?;
     let time_zone_2 = TimeZone::new(vec![], utc_local_time_types.clone(), vec![], Some(fixed_extra_rule))?;
     let time_zone_3 = TimeZone::new(vec![Transition::new(0, 0)], utc_local_time_types.clone(), vec![], None)?;
-    let time_zone_4 =
-      TimeZone::new(vec![Transition::new(i32::MIN.into(), 0), Transition::new(0, 1)], vec![utc, cet], Vec::new(), Some(fixed_extra_rule))?;
+    let time_zone_4 = TimeZone::new(
+      vec![Transition::new(i32::MIN.into(), 0), Transition::new(0, 1)],
+      vec![utc, cet],
+      Vec::new(),
+      Some(fixed_extra_rule),
+    )?;
 
     assert_eq!(*time_zone_1.find_local_time_type(0)?, utc);
     assert_eq!(*time_zone_2.find_local_time_type(0)?, cet);
@@ -947,7 +976,12 @@ mod tests {
     );
     assert!(time_zone_err.is_err());
 
-    let time_zone = TimeZone::new(vec![Transition::new(i64::MAX, 0)], vec![LocalTimeType::UTC], vec![LeapSecond::new(0, 1)], None)?;
+    let time_zone = TimeZone::new(
+      vec![Transition::new(i64::MAX, 0)],
+      vec![LocalTimeType::UTC],
+      vec![LeapSecond::new(0, 1)],
+      None,
+    )?;
     assert!(matches!(time_zone.find_local_time_type(i64::MAX), Err(Error::FindLocalTimeType(_))));
 
     Ok(())
@@ -970,7 +1004,10 @@ mod tests {
       Vec::new(),
       None,
     )?;
-    assert_eq!(near_max.find_local_time_type_from_local(local)?, MappedLocalTime::Single(LocalTimeType::UTC));
+    assert_eq!(
+      near_max.find_local_time_type_from_local(local)?,
+      MappedLocalTime::Single(LocalTimeType::UTC)
+    );
 
     let near_min = TimeZone::new(
       vec![Transition::new(i64::MIN, 0)],

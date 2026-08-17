@@ -59,7 +59,7 @@ impl IsoWeek {
     };
     let flags = YearFlags::from_year(year);
     IsoWeek {
-      ywf: (year << 10) | (week << 4) as i32 | i32::from(flags.0)
+      ywf: (year << 10) | (week << 4) as i32 | i32::from(flags.0),
     }
   }
 
@@ -139,10 +139,22 @@ impl IsoWeek {
 /// use chrono::Datelike;
 /// use chrono::NaiveDate;
 ///
-/// assert_eq!(format!("{:?}", NaiveDate::from_ymd_opt(2015, 9, 5).unwrap().iso_week()), "2015-W36");
-/// assert_eq!(format!("{:?}", NaiveDate::from_ymd_opt(0, 1, 3).unwrap().iso_week()), "0000-W01");
 /// assert_eq!(
-///   format!("{:?}", NaiveDate::from_ymd_opt(9999, 12, 31).unwrap().iso_week()),
+///   format!(
+///     "{:?}",
+///     NaiveDate::from_ymd_opt(2015, 9, 5).unwrap().iso_week()
+///   ),
+///   "2015-W36"
+/// );
+/// assert_eq!(
+///   format!("{:?}", NaiveDate::from_ymd_opt(0, 1, 3).unwrap().iso_week()),
+///   "0000-W01"
+/// );
+/// assert_eq!(
+///   format!(
+///     "{:?}",
+///     NaiveDate::from_ymd_opt(9999, 12, 31).unwrap().iso_week()
+///   ),
 ///   "9999-W52"
 /// );
 /// ```
@@ -151,9 +163,15 @@ impl IsoWeek {
 ///
 /// ```
 /// # use chrono::{NaiveDate, Datelike};
-/// assert_eq!(format!("{:?}", NaiveDate::from_ymd_opt(0, 1, 2).unwrap().iso_week()), "-0001-W52");
 /// assert_eq!(
-///   format!("{:?}", NaiveDate::from_ymd_opt(10000, 12, 31).unwrap().iso_week()),
+///   format!("{:?}", NaiveDate::from_ymd_opt(0, 1, 2).unwrap().iso_week()),
+///   "-0001-W52"
+/// );
+/// assert_eq!(
+///   format!(
+///     "{:?}",
+///     NaiveDate::from_ymd_opt(10000, 12, 31).unwrap().iso_week()
+///   ),
 ///   "+10000-W52"
 /// );
 /// ```

@@ -440,7 +440,10 @@ pub trait TimeZone: Sized + Clone {
   /// use chrono::TimeZone;
   /// use chrono::Utc;
   ///
-  /// assert_eq!(Utc.timestamp_opt(1431648000, 0).unwrap().to_string(), "2015-05-15 00:00:00 UTC");
+  /// assert_eq!(
+  ///   Utc.timestamp_opt(1431648000, 0).unwrap().to_string(),
+  ///   "2015-05-15 00:00:00 UTC"
+  /// );
   /// ```
   fn timestamp_opt(&self, secs: i64, nsecs: u32) -> MappedLocalTime<DateTime<Self>> {
     match DateTime::from_timestamp(secs, nsecs) {
@@ -511,7 +514,10 @@ pub trait TimeZone: Sized + Clone {
   /// use chrono::TimeZone;
   /// use chrono::Utc;
   ///
-  /// assert_eq!(Utc.timestamp_micros(1431648000000).unwrap().timestamp(), 1431648);
+  /// assert_eq!(
+  ///   Utc.timestamp_micros(1431648000000).unwrap().timestamp(),
+  ///   1431648
+  /// );
   /// ```
   fn timestamp_micros(&self, micros: i64) -> MappedLocalTime<DateTime<Self>> {
     match DateTime::from_timestamp_micros(micros) {

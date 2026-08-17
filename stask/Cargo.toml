@@ -18,6 +18,9 @@ path = "src/lib.rs"
 name = "stask"
 path = "src/main.rs"
 
+[lints]
+workspace = true
+
 [dependencies]
 template-core.workspace  = true
 template-stask.workspace = true

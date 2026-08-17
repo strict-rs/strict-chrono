@@ -66,10 +66,7 @@ use crate::naive::NaiveDateTime;
 #[cfg_attr(
   feature = "rkyv",
   derive(Archive, Deserialize, Serialize),
-  rkyv(
-    compare(PartialEq),
-    derive(Clone, Copy, PartialEq, Eq, Debug, Hash)
-  )
+  rkyv(compare(PartialEq), derive(Clone, Copy, PartialEq, Eq, Debug, Hash))
 )]
 #[cfg_attr(all(feature = "arbitrary", feature = "std"), derive(arbitrary::Arbitrary))]
 pub struct Utc;

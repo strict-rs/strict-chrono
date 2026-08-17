@@ -2,15 +2,20 @@
 
 use core::mem::MaybeUninit;
 
-use rkyv::{
-  api::low::{from_bytes, to_bytes_in_with_alloc, LowSerializer, LowValidator},
-  bytecheck::CheckBytes,
-  de::pooling::Unpool,
-  rancor::{Failure, Strategy},
-  ser::{allocator::SubAllocator, writer::Buffer},
-  util::Align,
-  Archive, Deserialize, Serialize,
-};
+use rkyv::Archive;
+use rkyv::Deserialize;
+use rkyv::Serialize;
+use rkyv::api::low::LowSerializer;
+use rkyv::api::low::LowValidator;
+use rkyv::api::low::from_bytes;
+use rkyv::api::low::to_bytes_in_with_alloc;
+use rkyv::bytecheck::CheckBytes;
+use rkyv::de::pooling::Unpool;
+use rkyv::rancor::Failure;
+use rkyv::rancor::Strategy;
+use rkyv::ser::allocator::SubAllocator;
+use rkyv::ser::writer::Buffer;
+use rkyv::util::Align;
 
 /// Fixed storage available to the archive writer and scratch allocator.
 const ARCHIVE_CAPACITY: usize = 256;
@@ -19,48 +24,46 @@ const ARCHIVE_CAPACITY: usize = 256;
 pub(crate) fn roundtrip<T>(value: &T) -> Result<T, Failure>
 where
   T: Archive,
-  for<'output, 'scratch> T:
-    Serialize<LowSerializer<Buffer<'output>, SubAllocator<'scratch>, Failure>>,
-  T::Archived:
-    for<'bytes> CheckBytes<LowValidator<'bytes, Failure>> + Deserialize<T, Strategy<Unpool, Failure>>,
+  for<'output, 'scratch> T: Serialize<LowSerializer<Buffer<'output>, SubAllocator<'scratch>, Failure>>,
+  T::Archived: for<'bytes> CheckBytes<LowValidator<'bytes, Failure>> + Deserialize<T, Strategy<Unpool, Failure>>,
 {
   let mut output = Align([MaybeUninit::<u8>::uninit(); ARCHIVE_CAPACITY]);
   let mut scratch = [MaybeUninit::<u8>::uninit(); ARCHIVE_CAPACITY];
-  let bytes = to_bytes_in_with_alloc::<_, _, Failure>(
-    value,
-    Buffer::from(&mut *output),
-    SubAllocator::new(&mut scratch),
-  )?;
+  let bytes = to_bytes_in_with_alloc::<_, _, Failure>(value, Buffer::from(&mut *output), SubAllocator::new(&mut scratch))?;
   from_bytes::<T, Failure>(&bytes)
 }
 
 /// Archives one value and lets a test inspect its initialized byte slice.
 pub(crate) fn inspect_archive<T, R>(value: &T, inspect: impl FnOnce(&[u8]) -> R) -> Result<R, Failure>
 where
-  for<'output, 'scratch> T:
-    Serialize<LowSerializer<Buffer<'output>, SubAllocator<'scratch>, Failure>>,
+  for<'output, 'scratch> T: Serialize<LowSerializer<Buffer<'output>, SubAllocator<'scratch>, Failure>>,
 {
   let mut output = Align([MaybeUninit::<u8>::uninit(); ARCHIVE_CAPACITY]);
   let mut scratch = [MaybeUninit::<u8>::uninit(); ARCHIVE_CAPACITY];
-  let bytes = to_bytes_in_with_alloc::<_, _, Failure>(
-    value,
-    Buffer::from(&mut *output),
-    SubAllocator::new(&mut scratch),
-  )?;
+  let bytes = to_bytes_in_with_alloc::<_, _, Failure>(value, Buffer::from(&mut *output), SubAllocator::new(&mut scratch))?;
   Ok(inspect(&bytes))
 }
 
 #[cfg(test)]
 mod tests {
-  use super::{inspect_archive, roundtrip};
-  use crate::{
-    DateTime, FixedOffset, Month, NaiveDate, NaiveDateTime, NaiveTime, TimeDelta, TimeZone, Utc,
-    Weekday,
-  };
+  use super::inspect_archive;
+  use super::roundtrip;
+  use crate::DateTime;
+  use crate::FixedOffset;
+  use crate::Month;
+  use crate::NaiveDate;
+  use crate::NaiveDateTime;
+  use crate::NaiveTime;
+  use crate::TimeDelta;
+  use crate::TimeZone;
+  use crate::Utc;
+  use crate::Weekday;
 
   #[test]
   fn rkyv_roundtrips_timezone_aware_values() {
-    let naive = NaiveDate::from_ymd_opt(2024, 2, 29).unwrap().and_time(NaiveTime::from_hms_nano_opt(23, 59, 59, 999_999_999).unwrap());
+    let naive = NaiveDate::from_ymd_opt(2024, 2, 29)
+      .unwrap()
+      .and_time(NaiveTime::from_hms_nano_opt(23, 59, 59, 999_999_999).unwrap());
     let utc = DateTime::<Utc>::from_naive_utc_and_offset(naive, Utc);
     assert_eq!(roundtrip(&utc).unwrap(), utc);
 
@@ -74,10 +77,7 @@ mod tests {
   fn rkyv_roundtrips_local_datetime() {
     use crate::Local;
 
-    let local = Local
-      .with_ymd_and_hms(2024, 2, 29, 12, 34, 56)
-      .earliest()
-      .unwrap();
+    let local = Local.with_ymd_and_hms(2024, 2, 29, 12, 34, 56).earliest().unwrap();
     assert_eq!(roundtrip(&local).unwrap(), local);
   }
 
@@ -136,10 +136,8 @@ mod tests {
     let zero = FixedOffset::east_opt(0).unwrap();
     let utc_min = DateTime::<Utc>::MIN_UTC;
     let utc_max = DateTime::<Utc>::MAX_UTC;
-    let fixed_min =
-      DateTime::<FixedOffset>::from_naive_utc_and_offset(NaiveDateTime::MIN, zero);
-    let fixed_max =
-      DateTime::<FixedOffset>::from_naive_utc_and_offset(NaiveDateTime::MAX, zero);
+    let fixed_min = DateTime::<FixedOffset>::from_naive_utc_and_offset(NaiveDateTime::MIN, zero);
+    let fixed_max = DateTime::<FixedOffset>::from_naive_utc_and_offset(NaiveDateTime::MAX, zero);
 
     assert_eq!(roundtrip(&utc_min).unwrap(), utc_min);
     assert_eq!(roundtrip(&utc_max).unwrap(), utc_max);

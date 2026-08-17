@@ -2,13 +2,17 @@
 
 use core::fmt;
 
-use chrono_rkyv_migrate::{
-  migrate, DetectedSource, LegacyDecode, MigrationError, SourceHint,
-};
-use rancor::{Fallible, Source};
-use strict_test_support::{
-  ensure, ensure_contains, ensure_ok, TestFailure,
-};
+use chrono_rkyv_migrate::DetectedSource;
+use chrono_rkyv_migrate::LegacyDecode;
+use chrono_rkyv_migrate::MigrationError;
+use chrono_rkyv_migrate::SourceHint;
+use chrono_rkyv_migrate::migrate;
+use rancor::Fallible;
+use rancor::Source;
+use strict_test_support::TestFailure;
+use strict_test_support::ensure;
+use strict_test_support::ensure_contains;
+use strict_test_support::ensure_ok;
 
 /// Synthetic current archive used to deterministically exercise auto-detection.
 #[derive(Debug, PartialEq, rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
@@ -23,14 +27,11 @@ impl LegacyDecode for Synthetic {
   fn decode_legacy(bytes: &[u8]) -> Result<Self, MigrationError> {
     if bytes == [0xa5] {
       return Ok(Self {
-        marker: 3,
-        value:  9,
+        marker: 3, value: 9
       });
     }
-    let current = rkyv::from_bytes::<Self, rancor::Error>(bytes).map_err(|error| {
-      MigrationError::InvalidLegacyValue {
-        detail: format!("synthetic legacy marker is invalid: {error}"),
-      }
+    let current = rkyv::from_bytes::<Self, rancor::Error>(bytes).map_err(|error| MigrationError::InvalidLegacyValue {
+      detail: format!("synthetic legacy marker is invalid: {error}"),
     })?;
     match current.marker {
       0 => Ok(current),
@@ -82,7 +83,7 @@ impl LegacyDecode for EncodingFailure {
   fn decode_legacy(bytes: &[u8]) -> Result<Self, MigrationError> {
     if bytes == [0x5a] {
       Ok(Self {
-        marker: 7,
+        marker: 7
       })
     } else {
       Err(MigrationError::InvalidLegacyValue {
@@ -116,8 +117,7 @@ fn auto_detects_legacy_only_input() -> Result<(), TestFailure> {
   ensure(
     migrated.value
       == Synthetic {
-        marker: 3,
-        value:  9,
+        marker: 3, value: 9
       },
     "legacy-only input preserves the downstream decoder value",
   )?;
@@ -137,8 +137,7 @@ fn auto_detects_current_only_input() -> Result<(), TestFailure> {
   ensure(
     migrated.value
       == Synthetic {
-        marker: 2,
-        value:  7,
+        marker: 2, value: 7
       },
     "current-only input preserves the current decoder value",
   )?;
@@ -151,15 +150,11 @@ fn auto_detects_current_only_input() -> Result<(), TestFailure> {
 #[test]
 fn auto_reports_compatible_dual_valid_input() -> Result<(), TestFailure> {
   let bytes = current_bytes(0, 7)?;
-  let migrated = ensure_ok(
-    migrate::<Synthetic>(&bytes, SourceHint::Auto),
-    "migrate dual-valid equal archive",
-  )?;
+  let migrated = ensure_ok(migrate::<Synthetic>(&bytes, SourceHint::Auto), "migrate dual-valid equal archive")?;
   ensure(
     migrated.value
       == Synthetic {
-        marker: 0,
-        value:  7,
+        marker: 0, value: 7
       },
     "compatible input preserves the shared logical value",
   )?;
@@ -173,10 +168,7 @@ fn auto_reports_compatible_dual_valid_input() -> Result<(), TestFailure> {
 fn auto_rejects_different_dual_valid_values() -> Result<(), TestFailure> {
   let bytes = current_bytes(1, 7)?;
   ensure(
-    matches!(
-      migrate::<Synthetic>(&bytes, SourceHint::Auto),
-      Err(MigrationError::AmbiguousFormat)
-    ),
+    matches!(migrate::<Synthetic>(&bytes, SourceHint::Auto), Err(MigrationError::AmbiguousFormat)),
     "dual-valid different input is never guessed",
   )
 }
@@ -194,15 +186,8 @@ fn auto_retains_both_unreadable_stages() -> Result<(), TestFailure> {
       });
     }
   };
-  ensure_contains(
-    &error.0,
-    "synthetic legacy marker",
-    "unreadable input retains the legacy failure",
-  )?;
-  ensure(
-    !error.1.is_empty(),
-    "unreadable input retains the current failure",
-  )
+  ensure_contains(&error.0, "synthetic legacy marker", "unreadable input retains the legacy failure")?;
+  ensure(!error.1.is_empty(), "unreadable input retains the current failure")
 }
 
 #[test]

@@ -130,7 +130,15 @@ fn verify_against_date_command_format_local(path: &'static str, dt: NaiveDateTim
     .env("LANG", "c")
     .env("LC_ALL", "c")
     .arg("-d")
-    .arg(format!("{}-{:02}-{:02} {:02}:{:02}:{:02}", dt.year(), dt.month(), dt.day(), dt.hour(), dt.minute(), dt.second()))
+    .arg(format!(
+      "{}-{:02}-{:02} {:02}:{:02}:{:02}",
+      dt.year(),
+      dt.month(),
+      dt.day(),
+      dt.hour(),
+      dt.minute(),
+      dt.second()
+    ))
     .arg(format!("+{required_format}"))
     .output()
     .unwrap();

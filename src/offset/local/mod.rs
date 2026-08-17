@@ -33,7 +33,9 @@ mod inner;
 mod inner;
 
 #[cfg(all(windows, feature = "clock"))]
-#[allow(unreachable_pub)]
+#[allow(
+  unreachable_pub, non_snake_case, non_upper_case_globals, non_camel_case_types, dead_code, clippy::all
+)]
 mod win_bindings;
 
 #[cfg(all(any(target_os = "android", target_env = "ohos", test), feature = "clock"))]
@@ -358,7 +360,10 @@ mod tests {
 
     if let Some(dt) = today.and_hms_milli_opt(15, 2, 3, 1234) {
       let timestr = dt.time().to_string();
-      assert!(timestr == "15:02:03.234" || timestr == "15:02:04.234", "unexpected timestr {timestr:?}");
+      assert!(
+        timestr == "15:02:03.234" || timestr == "15:02:04.234",
+        "unexpected timestr {timestr:?}"
+      );
     }
   }
 
@@ -484,11 +489,20 @@ mod tests {
       Transition::new(NaiveDateTime::MAX.with_month(7).unwrap(), std, dst),
       Transition::new(NaiveDateTime::MAX, dst, std),
     ];
-    assert_eq!(lookup_with_dst_transitions(&transitions, NaiveDateTime::MAX.with_month(3).unwrap()), MappedLocalTime::Single(std));
-    assert_eq!(lookup_with_dst_transitions(&transitions, NaiveDateTime::MAX.with_month(8).unwrap()), MappedLocalTime::Single(dst));
+    assert_eq!(
+      lookup_with_dst_transitions(&transitions, NaiveDateTime::MAX.with_month(3).unwrap()),
+      MappedLocalTime::Single(std)
+    );
+    assert_eq!(
+      lookup_with_dst_transitions(&transitions, NaiveDateTime::MAX.with_month(8).unwrap()),
+      MappedLocalTime::Single(dst)
+    );
     // Doesn't panic with `NaiveDateTime::MAX` as argument (which would be out of range when
     // converted to UTC).
-    assert_eq!(lookup_with_dst_transitions(&transitions, NaiveDateTime::MAX), MappedLocalTime::Ambiguous(dst, std));
+    assert_eq!(
+      lookup_with_dst_transitions(&transitions, NaiveDateTime::MAX),
+      MappedLocalTime::Ambiguous(dst, std)
+    );
 
     // Transition before UTC year end doesn't panic in year of `NaiveDate::MIN`
     let std = FixedOffset::west_opt(3 * 60 * 60).unwrap();
@@ -497,11 +511,20 @@ mod tests {
       Transition::new(NaiveDateTime::MIN, std, dst),
       Transition::new(NaiveDateTime::MIN.with_month(6).unwrap(), dst, std),
     ];
-    assert_eq!(lookup_with_dst_transitions(&transitions, NaiveDateTime::MIN.with_month(3).unwrap()), MappedLocalTime::Single(dst));
-    assert_eq!(lookup_with_dst_transitions(&transitions, NaiveDateTime::MIN.with_month(8).unwrap()), MappedLocalTime::Single(std));
+    assert_eq!(
+      lookup_with_dst_transitions(&transitions, NaiveDateTime::MIN.with_month(3).unwrap()),
+      MappedLocalTime::Single(dst)
+    );
+    assert_eq!(
+      lookup_with_dst_transitions(&transitions, NaiveDateTime::MIN.with_month(8).unwrap()),
+      MappedLocalTime::Single(std)
+    );
     // Doesn't panic with `NaiveDateTime::MIN` as argument (which would be out of range when
     // converted to UTC).
-    assert_eq!(lookup_with_dst_transitions(&transitions, NaiveDateTime::MIN), MappedLocalTime::Ambiguous(std, dst));
+    assert_eq!(
+      lookup_with_dst_transitions(&transitions, NaiveDateTime::MIN),
+      MappedLocalTime::Ambiguous(std, dst)
+    );
   }
 
   #[test]

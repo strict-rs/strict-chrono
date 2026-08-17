@@ -172,7 +172,10 @@ pub trait Datelike: Sized {
   ///   NaiveDate::from_ymd_opt(year, month, date.day())
   /// }
   /// let d = NaiveDate::from_ymd_opt(2020, 2, 29).unwrap();
-  /// assert_eq!(with_year_month_fixed(d, 2019, 1), NaiveDate::from_ymd_opt(2019, 1, 29));
+  /// assert_eq!(
+  ///   with_year_month_fixed(d, 2019, 1),
+  ///   NaiveDate::from_ymd_opt(2019, 1, 29)
+  /// );
   /// ```
   fn with_month(&self, month: u32) -> Option<Self>;
 
@@ -254,10 +257,22 @@ pub trait Datelike: Sized {
   /// use chrono::Datelike;
   /// use chrono::NaiveDate;
   ///
-  /// assert_eq!(NaiveDate::from_ymd_opt(1970, 1, 1).unwrap().num_days_from_ce(), 719_163);
-  /// assert_eq!(NaiveDate::from_ymd_opt(2, 1, 1).unwrap().num_days_from_ce(), 366);
-  /// assert_eq!(NaiveDate::from_ymd_opt(1, 1, 1).unwrap().num_days_from_ce(), 1);
-  /// assert_eq!(NaiveDate::from_ymd_opt(0, 1, 1).unwrap().num_days_from_ce(), -365);
+  /// assert_eq!(
+  ///   NaiveDate::from_ymd_opt(1970, 1, 1).unwrap().num_days_from_ce(),
+  ///   719_163
+  /// );
+  /// assert_eq!(
+  ///   NaiveDate::from_ymd_opt(2, 1, 1).unwrap().num_days_from_ce(),
+  ///   366
+  /// );
+  /// assert_eq!(
+  ///   NaiveDate::from_ymd_opt(1, 1, 1).unwrap().num_days_from_ce(),
+  ///   1
+  /// );
+  /// assert_eq!(
+  ///   NaiveDate::from_ymd_opt(0, 1, 1).unwrap().num_days_from_ce(),
+  ///   -365
+  /// );
   /// ```
   fn num_days_from_ce(&self) -> i32 {
     // See test_num_days_from_ce_against_alternative_impl below for a more straightforward

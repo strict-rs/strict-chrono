@@ -95,7 +95,10 @@ pub(super) fn parse(bytes: &[u8]) -> Result<TimeZone, Error> {
 
       match tz_string.is_empty() {
         true => None,
-        false => Some(TransitionRule::from_tz_string(tz_string.as_bytes(), state.header.version == Version::V3)?),
+        false => Some(TransitionRule::from_tz_string(
+          tz_string.as_bytes(),
+          state.header.version == Version::V3,
+        )?),
       }
     }
     None => None,

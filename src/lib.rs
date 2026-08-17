@@ -253,8 +253,14 @@
 //! // arithmetic operations
 //! let dt1 = Utc.with_ymd_and_hms(2014, 11, 14, 8, 9, 10).unwrap();
 //! let dt2 = Utc.with_ymd_and_hms(2014, 11, 14, 10, 9, 8).unwrap();
-//! assert_eq!(dt1.signed_duration_since(dt2), TimeDelta::try_seconds(-2 * 3600 + 2).unwrap());
-//! assert_eq!(dt2.signed_duration_since(dt1), TimeDelta::try_seconds(2 * 3600 - 2).unwrap());
+//! assert_eq!(
+//!   dt1.signed_duration_since(dt2),
+//!   TimeDelta::try_seconds(-2 * 3600 + 2).unwrap()
+//! );
+//! assert_eq!(
+//!   dt2.signed_duration_since(dt1),
+//!   TimeDelta::try_seconds(2 * 3600 - 2).unwrap()
+//! );
 //! assert_eq!(
 //!   Utc.with_ymd_and_hms(1970, 1, 1, 0, 0, 0).unwrap()
 //!     + TimeDelta::try_seconds(1_000_000_000).unwrap(),
@@ -295,14 +301,23 @@
 //! # #[cfg(all(feature = "unstable-locales", feature = "alloc"))]
 //! # fn test() {
 //! let dt = Utc.with_ymd_and_hms(2014, 11, 28, 12, 0, 9).unwrap();
-//! assert_eq!(dt.format("%Y-%m-%d %H:%M:%S").to_string(), "2014-11-28 12:00:09");
-//! assert_eq!(dt.format("%a %b %e %T %Y").to_string(), "Fri Nov 28 12:00:09 2014");
+//! assert_eq!(
+//!   dt.format("%Y-%m-%d %H:%M:%S").to_string(),
+//!   "2014-11-28 12:00:09"
+//! );
+//! assert_eq!(
+//!   dt.format("%a %b %e %T %Y").to_string(),
+//!   "Fri Nov 28 12:00:09 2014"
+//! );
 //! assert_eq!(
 //!   dt.format_localized("%A %e %B %Y, %T", Locale::fr_BE).to_string(),
 //!   "vendredi 28 novembre 2014, 12:00:09"
 //! );
 //!
-//! assert_eq!(dt.format("%a %b %e %T %Y").to_string(), dt.format("%c").to_string());
+//! assert_eq!(
+//!   dt.format("%a %b %e %T %Y").to_string(),
+//!   dt.format("%c").to_string()
+//! );
 //! assert_eq!(dt.to_string(), "2014-11-28 12:00:09 UTC");
 //! assert_eq!(dt.to_rfc2822(), "Fri, 28 Nov 2014 12:00:09 +0000");
 //! assert_eq!(dt.to_rfc3339(), "2014-11-28T12:00:09+00:00");
@@ -345,17 +360,32 @@
 //! let fixed_dt = dt.with_timezone(&FixedOffset::east_opt(9 * 3600).unwrap());
 //!
 //! // method 1
-//! assert_eq!("2014-11-28T12:00:09Z".parse::<DateTime<Utc>>(), Ok(dt.clone()));
-//! assert_eq!("2014-11-28T21:00:09+09:00".parse::<DateTime<Utc>>(), Ok(dt.clone()));
-//! assert_eq!("2014-11-28T21:00:09+09:00".parse::<DateTime<FixedOffset>>(), Ok(fixed_dt.clone()));
+//! assert_eq!(
+//!   "2014-11-28T12:00:09Z".parse::<DateTime<Utc>>(),
+//!   Ok(dt.clone())
+//! );
+//! assert_eq!(
+//!   "2014-11-28T21:00:09+09:00".parse::<DateTime<Utc>>(),
+//!   Ok(dt.clone())
+//! );
+//! assert_eq!(
+//!   "2014-11-28T21:00:09+09:00".parse::<DateTime<FixedOffset>>(),
+//!   Ok(fixed_dt.clone())
+//! );
 //!
 //! // method 2
 //! assert_eq!(
 //!   DateTime::parse_from_str("2014-11-28 21:00:09 +09:00", "%Y-%m-%d %H:%M:%S %z"),
 //!   Ok(fixed_dt.clone())
 //! );
-//! assert_eq!(DateTime::parse_from_rfc2822("Fri, 28 Nov 2014 21:00:09 +0900"), Ok(fixed_dt.clone()));
-//! assert_eq!(DateTime::parse_from_rfc3339("2014-11-28T21:00:09+09:00"), Ok(fixed_dt.clone()));
+//! assert_eq!(
+//!   DateTime::parse_from_rfc2822("Fri, 28 Nov 2014 21:00:09 +0900"),
+//!   Ok(fixed_dt.clone())
+//! );
+//! assert_eq!(
+//!   DateTime::parse_from_rfc3339("2014-11-28T21:00:09+09:00"),
+//!   Ok(fixed_dt.clone())
+//! );
 //!
 //! // oops, the year is missing!
 //! assert!(DateTime::parse_from_str("Fri Nov 28 12:00:09", "%a %b %e %T %Y").is_err());
@@ -515,11 +545,11 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
-mod time_delta;
 #[cfg(all(test, feature = "rkyv"))]
 mod rkyv_contract_test;
 #[cfg(all(test, feature = "rkyv-validation"))]
 mod rkyv_test;
+mod time_delta;
 #[doc(no_inline)]
 #[cfg(any(feature = "std", feature = "core-error"))]
 pub use time_delta::OutOfRangeError;

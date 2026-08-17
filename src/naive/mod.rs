@@ -323,15 +323,18 @@ mod test {
   #[test]
   fn test_naiveweek_eq() {
     let a = NaiveWeek {
-      date: NaiveDate::from_ymd_opt(2025, 4, 3).unwrap(), start: Weekday::Mon
+      date:  NaiveDate::from_ymd_opt(2025, 4, 3).unwrap(),
+      start: Weekday::Mon,
     };
     let b = NaiveWeek {
-      date: NaiveDate::from_ymd_opt(2025, 4, 4).unwrap(), start: Weekday::Mon
+      date:  NaiveDate::from_ymd_opt(2025, 4, 4).unwrap(),
+      start: Weekday::Mon,
     };
     assert_eq!(a, b);
 
     let c = NaiveWeek {
-      date: NaiveDate::from_ymd_opt(2025, 4, 3).unwrap(), start: Weekday::Sun
+      date:  NaiveDate::from_ymd_opt(2025, 4, 3).unwrap(),
+      start: Weekday::Sun,
     };
     assert_ne!(a, c);
     assert_ne!(b, c);
@@ -340,13 +343,16 @@ mod test {
   #[test]
   fn test_naiveweek_hash() {
     let a = NaiveWeek {
-      date: NaiveDate::from_ymd_opt(2025, 4, 3).unwrap(), start: Weekday::Mon
+      date:  NaiveDate::from_ymd_opt(2025, 4, 3).unwrap(),
+      start: Weekday::Mon,
     };
     let b = NaiveWeek {
-      date: NaiveDate::from_ymd_opt(2025, 4, 4).unwrap(), start: Weekday::Mon
+      date:  NaiveDate::from_ymd_opt(2025, 4, 4).unwrap(),
+      start: Weekday::Mon,
     };
     let c = NaiveWeek {
-      date: NaiveDate::from_ymd_opt(2025, 4, 3).unwrap(), start: Weekday::Sun
+      date:  NaiveDate::from_ymd_opt(2025, 4, 3).unwrap(),
+      start: Weekday::Sun,
     };
 
     let mut hasher = DefaultHasher::default();

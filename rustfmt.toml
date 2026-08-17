@@ -1,5 +1,5 @@
 # Retain Chrono's original settings for this parameter:
-use_small_heuristics = "Max"
+use_small_heuristics = "Default"
 
 # rustfmt config for this workspace.
 #

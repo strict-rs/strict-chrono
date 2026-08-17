@@ -332,7 +332,11 @@ impl<'a> StrftimeItems<'a> {
   #[must_use]
   pub const fn new_with_locale(s: &'a str, locale: Locale) -> StrftimeItems<'a> {
     StrftimeItems {
-      remainder: s, queue: &[], lenient: false, locale_str: "", locale: Some(locale)
+      remainder:  s,
+      queue:      &[],
+      lenient:    false,
+      locale_str: "",
+      locale:     Some(locale),
     }
   }
 
@@ -377,7 +381,11 @@ impl<'a> StrftimeItems<'a> {
   ///
   /// // Parsing
   /// let mut parsed = Parsed::new();
-  /// parse(&mut parsed, "11 Jul 2023  9.00", fmt_items.as_slice().iter())?;
+  /// parse(
+  ///   &mut parsed,
+  ///   "11 Jul 2023  9.00",
+  ///   fmt_items.as_slice().iter(),
+  /// )?;
   /// let parsed_dt = parsed.to_naive_datetime_with_offset(0)?;
   /// assert_eq!(parsed_dt, datetime);
   /// # Ok::<(), chrono::ParseError>(())
@@ -802,32 +810,82 @@ mod tests {
     assert_eq!(parse_and_collect("😽😽"), [Literal("😽😽")]);
     assert_eq!(parse_and_collect(" \t\n\r "), [Space(" \t\n\r ")]);
     assert_eq!(parse_and_collect("hello?"), [Literal("hello?")]);
-    assert_eq!(parse_and_collect("a  b\t\nc"), [Literal("a"), Space("  "), Literal("b"), Space("\t\n"), Literal("c")]);
+    assert_eq!(parse_and_collect("a  b\t\nc"), [
+      Literal("a"),
+      Space("  "),
+      Literal("b"),
+      Space("\t\n"),
+      Literal("c")
+    ]);
     assert_eq!(parse_and_collect("100%%"), [Literal("100"), Literal("%")]);
-    assert_eq!(parse_and_collect("100%% ok"), [Literal("100"), Literal("%"), Space(" "), Literal("ok")]);
+    assert_eq!(parse_and_collect("100%% ok"), [
+      Literal("100"),
+      Literal("%"),
+      Space(" "),
+      Literal("ok")
+    ]);
     assert_eq!(parse_and_collect("%%PDF-1.0"), [Literal("%"), Literal("PDF-1.0")]);
-    assert_eq!(parse_and_collect("%Y-%m-%d"), [num0(Year), Literal("-"), num0(Month), Literal("-"), num0(Day)]);
+    assert_eq!(parse_and_collect("%Y-%m-%d"), [
+      num0(Year),
+      Literal("-"),
+      num0(Month),
+      Literal("-"),
+      num0(Day)
+    ]);
     assert_eq!(parse_and_collect("😽   "), [Literal("😽"), Space("   ")]);
     assert_eq!(parse_and_collect("😽😽"), [Literal("😽😽")]);
     assert_eq!(parse_and_collect("😽😽😽"), [Literal("😽😽😽")]);
     assert_eq!(parse_and_collect("😽😽 😽"), [Literal("😽😽"), Space(" "), Literal("😽")]);
     assert_eq!(parse_and_collect("😽😽a 😽"), [Literal("😽😽a"), Space(" "), Literal("😽")]);
     assert_eq!(parse_and_collect("😽😽a b😽"), [Literal("😽😽a"), Space(" "), Literal("b😽")]);
-    assert_eq!(parse_and_collect("😽😽a b😽c"), [Literal("😽😽a"), Space(" "), Literal("b😽c")]);
+    assert_eq!(parse_and_collect("😽😽a b😽c"), [
+      Literal("😽😽a"),
+      Space(" "),
+      Literal("b😽c")
+    ]);
     assert_eq!(parse_and_collect("😽😽   "), [Literal("😽😽"), Space("   ")]);
     assert_eq!(parse_and_collect("😽😽   😽"), [Literal("😽😽"), Space("   "), Literal("😽")]);
     assert_eq!(parse_and_collect("   😽"), [Space("   "), Literal("😽")]);
     assert_eq!(parse_and_collect("   😽 "), [Space("   "), Literal("😽"), Space(" ")]);
-    assert_eq!(parse_and_collect("   😽 😽"), [Space("   "), Literal("😽"), Space(" "), Literal("😽")]);
-    assert_eq!(parse_and_collect("   😽 😽 "), [Space("   "), Literal("😽"), Space(" "), Literal("😽"), Space(" ")]);
-    assert_eq!(parse_and_collect("   😽  😽 "), [Space("   "), Literal("😽"), Space("  "), Literal("😽"), Space(" ")]);
-    assert_eq!(parse_and_collect("   😽  😽😽 "), [Space("   "), Literal("😽"), Space("  "), Literal("😽😽"), Space(" ")]);
+    assert_eq!(parse_and_collect("   😽 😽"), [
+      Space("   "),
+      Literal("😽"),
+      Space(" "),
+      Literal("😽")
+    ]);
+    assert_eq!(parse_and_collect("   😽 😽 "), [
+      Space("   "),
+      Literal("😽"),
+      Space(" "),
+      Literal("😽"),
+      Space(" ")
+    ]);
+    assert_eq!(parse_and_collect("   😽  😽 "), [
+      Space("   "),
+      Literal("😽"),
+      Space("  "),
+      Literal("😽"),
+      Space(" ")
+    ]);
+    assert_eq!(parse_and_collect("   😽  😽😽 "), [
+      Space("   "),
+      Literal("😽"),
+      Space("  "),
+      Literal("😽😽"),
+      Space(" ")
+    ]);
     assert_eq!(parse_and_collect("   😽😽"), [Space("   "), Literal("😽😽")]);
     assert_eq!(parse_and_collect("   😽😽 "), [Space("   "), Literal("😽😽"), Space(" ")]);
     assert_eq!(parse_and_collect("   😽😽    "), [Space("   "), Literal("😽😽"), Space("    ")]);
     assert_eq!(parse_and_collect("   😽😽    "), [Space("   "), Literal("😽😽"), Space("    ")]);
     assert_eq!(parse_and_collect(" 😽😽    "), [Space(" "), Literal("😽😽"), Space("    ")]);
-    assert_eq!(parse_and_collect(" 😽 😽😽    "), [Space(" "), Literal("😽"), Space(" "), Literal("😽😽"), Space("    ")]);
+    assert_eq!(parse_and_collect(" 😽 😽😽    "), [
+      Space(" "),
+      Literal("😽"),
+      Space(" "),
+      Literal("😽😽"),
+      Space("    ")
+    ]);
     assert_eq!(parse_and_collect(" 😽 😽はい😽    ハンバーガー"), [
       Space(" "),
       Literal("😽"),
@@ -836,11 +894,22 @@ mod tests {
       Space("    "),
       Literal("ハンバーガー")
     ]);
-    assert_eq!(parse_and_collect("%%😽%%😽"), [Literal("%"), Literal("😽"), Literal("%"), Literal("😽")]);
+    assert_eq!(parse_and_collect("%%😽%%😽"), [
+      Literal("%"),
+      Literal("😽"),
+      Literal("%"),
+      Literal("😽")
+    ]);
     assert_eq!(parse_and_collect("%Y--%m"), [num0(Year), Literal("--"), num0(Month)]);
     assert_eq!(parse_and_collect("[%F]"), parse_and_collect("[%Y-%m-%d]"));
     assert_eq!(parse_and_collect("100%%😽"), [Literal("100"), Literal("%"), Literal("😽")]);
-    assert_eq!(parse_and_collect("100%%😽%%a"), [Literal("100"), Literal("%"), Literal("😽"), Literal("%"), Literal("a")]);
+    assert_eq!(parse_and_collect("100%%😽%%a"), [
+      Literal("100"),
+      Literal("%"),
+      Literal("😽"),
+      Literal("%"),
+      Literal("a")
+    ]);
     assert_eq!(parse_and_collect("😽100%%"), [Literal("😽100"), Literal("%")]);
     assert_eq!(parse_and_collect("%m %d"), [num0(Month), Space(" "), num0(Day)]);
     assert_eq!(parse_and_collect("%"), [Item::Error]);
@@ -852,7 +921,11 @@ mod tests {
     assert_eq!(parse_and_collect("%😽"), [Item::Error]);
     assert_eq!(parse_and_collect("%😽😽"), [Item::Error]);
     assert_eq!(parse_and_collect("%%%%"), [Literal("%"), Literal("%")]);
-    assert_eq!(parse_and_collect("%%%%ハンバーガー"), [Literal("%"), Literal("%"), Literal("ハンバーガー")]);
+    assert_eq!(parse_and_collect("%%%%ハンバーガー"), [
+      Literal("%"),
+      Literal("%"),
+      Literal("ハンバーガー")
+    ]);
     assert_eq!(parse_and_collect("foo%?"), [Item::Error]);
     assert_eq!(parse_and_collect("bar%42"), [Item::Error]);
     assert_eq!(parse_and_collect("quux% +"), [Item::Error]);
@@ -876,7 +949,9 @@ mod tests {
     assert_eq!(parse_and_collect("%Z"), [fixed(Fixed::TimezoneName)]);
     assert_eq!(parse_and_collect("%ZZZZ"), [fixed(Fixed::TimezoneName), Literal("ZZZ")]);
     assert_eq!(parse_and_collect("%Z😽"), [fixed(Fixed::TimezoneName), Literal("😽")]);
-    assert_eq!(parse_and_collect("%#z"), [internal_fixed(InternalInternal::TimezoneOffsetPermissive)]);
+    assert_eq!(parse_and_collect("%#z"), [internal_fixed(
+      InternalInternal::TimezoneOffsetPermissive
+    )]);
     assert_eq!(parse_and_collect("%#m"), [Item::Error]);
   }
 
@@ -956,12 +1031,27 @@ mod tests {
     assert_eq!(dt.format("%c").to_string(), "Sun Jul  8 00:34:60 2001");
     assert_eq!(dt.format("%+").to_string(), "2001-07-08T00:34:60.026490708+09:30");
 
-    assert_eq!(dt.with_timezone(&Utc).format("%+").to_string(), "2001-07-07T15:04:60.026490708+00:00");
-    assert_eq!(dt.with_timezone(&Utc), DateTime::parse_from_str("2001-07-07T15:04:60.026490708Z", "%+").unwrap());
-    assert_eq!(dt.with_timezone(&Utc), DateTime::parse_from_str("2001-07-07T15:04:60.026490708UTC", "%+").unwrap());
-    assert_eq!(dt.with_timezone(&Utc), DateTime::parse_from_str("2001-07-07t15:04:60.026490708utc", "%+").unwrap());
+    assert_eq!(
+      dt.with_timezone(&Utc).format("%+").to_string(),
+      "2001-07-07T15:04:60.026490708+00:00"
+    );
+    assert_eq!(
+      dt.with_timezone(&Utc),
+      DateTime::parse_from_str("2001-07-07T15:04:60.026490708Z", "%+").unwrap()
+    );
+    assert_eq!(
+      dt.with_timezone(&Utc),
+      DateTime::parse_from_str("2001-07-07T15:04:60.026490708UTC", "%+").unwrap()
+    );
+    assert_eq!(
+      dt.with_timezone(&Utc),
+      DateTime::parse_from_str("2001-07-07t15:04:60.026490708utc", "%+").unwrap()
+    );
 
-    assert_eq!(dt.with_nanosecond(1_026_490_000).unwrap().format("%+").to_string(), "2001-07-08T00:34:60.026490+09:30");
+    assert_eq!(
+      dt.with_nanosecond(1_026_490_000).unwrap().format("%+").to_string(),
+      "2001-07-08T00:34:60.026490+09:30"
+    );
     assert_eq!(dt.format("%s").to_string(), "994518299");
 
     // special specifiers
@@ -971,7 +1061,10 @@ mod tests {
 
     // complex format specifiers
     assert_eq!(dt.format("  %Y%d%m%%%%%t%H%M%S\t").to_string(), "  20010807%%\t003460\t");
-    assert_eq!(dt.format("  %Y%d%m%%%%%t%H:%P:%M%S%:::z\t").to_string(), "  20010807%%\t00:am:3460+09\t");
+    assert_eq!(
+      dt.format("  %Y%d%m%%%%%t%H:%P:%M%S%:::z\t").to_string(),
+      "  20010807%%\t00:am:3460+09\t"
+    );
   }
 
   #[test]
@@ -1004,7 +1097,10 @@ mod tests {
     assert_eq!(dt.format_localized("%r", Locale::fr_BE).to_string(), "00:34:60");
 
     // date & time specifiers
-    assert_eq!(dt.format_localized("%c", Locale::fr_BE).to_string(), "dim 08 jui 2001 00:34:60 +09:30");
+    assert_eq!(
+      dt.format_localized("%c", Locale::fr_BE).to_string(),
+      "dim 08 jui 2001 00:34:60 +09:30"
+    );
 
     let nd = NaiveDate::from_ymd_opt(2001, 7, 8).unwrap();
 
@@ -1070,7 +1166,10 @@ mod tests {
     assert_eq!(dt.format_localized("%r", Locale::ko_KR).to_string(), "오전 12시 34분 60초");
 
     // date & time specifiers
-    assert_eq!(dt.format_localized("%c", Locale::ko_KR).to_string(), "2001년 07월 08일 (일) 오전 12시 34분 60초");
+    assert_eq!(
+      dt.format_localized("%c", Locale::ko_KR).to_string(),
+      "2001년 07월 08일 (일) 오전 12시 34분 60초"
+    );
   }
 
   #[test]
@@ -1148,7 +1247,10 @@ mod tests {
     let fmt_str = StrftimeItems::new_lenient("%Y-%m-%dT%H:%M:%S%z%Q%.2f%%%");
     let fmt_items = fmt_str.parse().unwrap();
     let dt = Utc.with_ymd_and_hms(2014, 5, 7, 12, 34, 56).unwrap();
-    assert_eq!(&dt.format_with_items(fmt_items.iter()).to_string(), "2014-05-07T12:34:56+0000%Q%.2f%%");
+    assert_eq!(
+      &dt.format_with_items(fmt_items.iter()).to_string(),
+      "2014-05-07T12:34:56+0000%Q%.2f%%"
+    );
   }
 
   /// Regression test for https://github.com/chronotope/chrono/issues/1725

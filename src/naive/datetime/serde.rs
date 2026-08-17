@@ -314,13 +314,13 @@ pub mod ts_nanoseconds_option {
   /// let my_s: S = serde_json::from_str(r#"{ "time": 1526522699918355733 }"#)?;
   /// let expected = DateTime::from_timestamp(1526522699, 918355733).unwrap().naive_utc();
   /// assert_eq!(my_s, S {
-  ///   time: Some(expected)
+  ///   time: Some(expected),
   /// });
   ///
   /// let my_s: S = serde_json::from_str(r#"{ "time": -1 }"#)?;
   /// let expected = DateTime::from_timestamp(-1, 999_999_999).unwrap().naive_utc();
   /// assert_eq!(my_s, S {
-  ///   time: Some(expected)
+  ///   time: Some(expected),
   /// });
   /// # Ok::<(), serde_json::Error>(())
   /// ```
@@ -600,13 +600,13 @@ pub mod ts_microseconds_option {
   /// let my_s: S = serde_json::from_str(r#"{ "time": 1526522699918355 }"#)?;
   /// let expected = DateTime::from_timestamp(1526522699, 918355000).unwrap().naive_utc();
   /// assert_eq!(my_s, S {
-  ///   time: Some(expected)
+  ///   time: Some(expected),
   /// });
   ///
   /// let my_s: S = serde_json::from_str(r#"{ "time": -1 }"#)?;
   /// let expected = DateTime::from_timestamp(-1, 999_999_000).unwrap().naive_utc();
   /// assert_eq!(my_s, S {
-  ///   time: Some(expected)
+  ///   time: Some(expected),
   /// });
   /// # Ok::<(), serde_json::Error>(())
   /// ```
@@ -886,13 +886,13 @@ pub mod ts_milliseconds_option {
   /// let my_s: S = serde_json::from_str(r#"{ "time": 1526522699918 }"#)?;
   /// let expected = DateTime::from_timestamp(1526522699, 918000000).unwrap().naive_utc();
   /// assert_eq!(my_s, S {
-  ///   time: Some(expected)
+  ///   time: Some(expected),
   /// });
   ///
   /// let my_s: S = serde_json::from_str(r#"{ "time": -1 }"#)?;
   /// let expected = DateTime::from_timestamp(-1, 999_000_000).unwrap().naive_utc();
   /// assert_eq!(my_s, S {
-  ///   time: Some(expected)
+  ///   time: Some(expected),
   /// });
   /// # Ok::<(), serde_json::Error>(())
   /// ```
@@ -1120,7 +1120,7 @@ pub mod ts_seconds_option {
   ///
   /// let expected = NaiveDate::from_ymd_opt(2018, 5, 17).unwrap().and_hms_opt(02, 04, 59).unwrap();
   /// let my_s = S {
-  ///   time: Some(expected)
+  ///   time: Some(expected),
   /// };
   /// let as_string = serde_json::to_string(&my_s)?;
   /// assert_eq!(as_string, r#"{"time":1526522699}"#);
@@ -1155,7 +1155,7 @@ pub mod ts_seconds_option {
   /// let my_s: S = serde_json::from_str(r#"{ "time": 1431684000 }"#)?;
   /// let expected = DateTime::from_timestamp_secs(1431684000).unwrap().naive_utc();
   /// assert_eq!(my_s, S {
-  ///   time: Some(expected)
+  ///   time: Some(expected),
   /// });
   /// # Ok::<(), serde_json::Error>(())
   /// ```
@@ -1251,7 +1251,10 @@ mod tests {
       .ok(),
       Some(r#""-0001-12-31T23:59:59.000000007""#.into())
     );
-    assert_eq!(serde_json::to_string(&NaiveDate::MIN.and_hms_opt(0, 0, 0).unwrap()).ok(), Some(r#""-262143-01-01T00:00:00""#.into()));
+    assert_eq!(
+      serde_json::to_string(&NaiveDate::MIN.and_hms_opt(0, 0, 0).unwrap()).ok(),
+      Some(r#""-262143-01-01T00:00:00""#.into())
+    );
     assert_eq!(
       serde_json::to_string(&NaiveDate::MAX.and_hms_nano_opt(23, 59, 59, 1_999_999_999).unwrap()).ok(),
       Some(r#""+262142-12-31T23:59:60.999999999""#.into())
@@ -1311,7 +1314,10 @@ mod tests {
           .unwrap()
       )
     );
-    assert_eq!(from_str(r#""-262143-01-01T00:00:00""#).ok(), Some(NaiveDate::MIN.and_hms_opt(0, 0, 0).unwrap()));
+    assert_eq!(
+      from_str(r#""-262143-01-01T00:00:00""#).ok(),
+      Some(NaiveDate::MIN.and_hms_opt(0, 0, 0).unwrap())
+    );
     assert_eq!(
       from_str(r#""+262142-12-31T23:59:60.999999999""#).ok(),
       Some(NaiveDate::MAX.and_hms_nano_opt(23, 59, 59, 1_999_999_999).unwrap())
@@ -1366,7 +1372,8 @@ mod tests {
     }
 
     let expected = Test {
-      one: Some(1), two: Some(Utc.with_ymd_and_hms(1970, 1, 1, 0, 1, 1).unwrap())
+      one: Some(1),
+      two: Some(Utc.with_ymd_and_hms(1970, 1, 1, 0, 1, 1).unwrap()),
     };
     let bytes: Vec<u8> = serialize(&expected).unwrap();
     let actual = deserialize::<Test>(&(bytes)).unwrap();

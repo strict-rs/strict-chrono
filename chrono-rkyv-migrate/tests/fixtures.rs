@@ -6,19 +6,38 @@
 )]
 
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::path::PathBuf;
 
-use chrono::{
-  Date, DateTime, Datelike, FixedOffset, Local, Month, NaiveDate, NaiveDateTime, NaiveTime,
-  TimeDelta, Utc, Weekday,
-};
-use chrono_rkyv_migrate::{
-  migrate, migrate_date_fixed, migrate_date_local, migrate_date_utc, source_format,
-  target_format, DetectedSource, Endianness, LegacyDecode, PointerWidth, SourceHint,
-};
-use strict_test_support::{
-  ensure, ensure_contains, ensure_eq, ensure_ok, ensure_some, TestFailure,
-};
+use chrono::Date;
+use chrono::DateTime;
+use chrono::Datelike;
+use chrono::FixedOffset;
+use chrono::Local;
+use chrono::Month;
+use chrono::NaiveDate;
+use chrono::NaiveDateTime;
+use chrono::NaiveTime;
+use chrono::TimeDelta;
+use chrono::Utc;
+use chrono::Weekday;
+use chrono_rkyv_migrate::DetectedSource;
+use chrono_rkyv_migrate::Endianness;
+use chrono_rkyv_migrate::LegacyDecode;
+use chrono_rkyv_migrate::PointerWidth;
+use chrono_rkyv_migrate::SourceHint;
+use chrono_rkyv_migrate::migrate;
+use chrono_rkyv_migrate::migrate_date_fixed;
+use chrono_rkyv_migrate::migrate_date_local;
+use chrono_rkyv_migrate::migrate_date_utc;
+use chrono_rkyv_migrate::source_format;
+use chrono_rkyv_migrate::target_format;
+use strict_test_support::TestFailure;
+use strict_test_support::ensure;
+use strict_test_support::ensure_contains;
+use strict_test_support::ensure_eq;
+use strict_test_support::ensure_ok;
+use strict_test_support::ensure_some;
 
 /// Exact source revision used to produce the checked-in legacy bytes.
 const PRODUCER_REVISION: &str = "cc3ba6e0a512101df43b31a8f5bd230a7695c01b";
@@ -37,9 +56,7 @@ fn mode_directory() -> &'static str {
 
 /// Returns the active mode's fixture root.
 fn fixture_root() -> PathBuf {
-  Path::new(env!("CARGO_MANIFEST_DIR"))
-    .join("fixtures")
-    .join(mode_directory())
+  Path::new(env!("CARGO_MANIFEST_DIR")).join("fixtures").join(mode_directory())
 }
 
 /// Loads one provenance-labelled fixture.
@@ -73,20 +90,14 @@ fn fixture_manifest_records_exact_provenance() -> Result<(), TestFailure> {
     Endianness::Little => "endianness = \"little\"",
     Endianness::Big => "endianness = \"big\"",
   };
-  ensure_contains(
-    &manifest,
-    expected_endianness,
-    "manifest records the selected legacy endianness",
-  )?;
+  ensure_contains(&manifest, expected_endianness, "manifest records the selected legacy endianness")?;
   ensure_eq(
     &manifest.matches("[[fixtures]]").count(),
     &48_usize,
     "manifest lists every direct-type fixture",
   )?;
   ensure_eq(
-    &manifest
-      .matches("producer-kind = \"frozen-pre-upgrade-date-layout\"")
-      .count(),
+    &manifest.matches("producer-kind = \"frozen-pre-upgrade-date-layout\"").count(),
     &9_usize,
     "manifest identifies every frozen deprecated Date fixture",
   )
@@ -98,10 +109,7 @@ fn migrates_every_frozen_legacy_fixture_idempotently() -> Result<(), TestFailure
     ($file:literal, $target:ty, $expected:expr) => {{
       let bytes = fixture($file)?;
       let expected: $target = $expected;
-      let migrated = ensure_ok(
-        migrate::<$target>(&bytes, SourceHint::Rkyv0_7),
-        "legacy fixture migrates",
-      )?;
+      let migrated = ensure_ok(migrate::<$target>(&bytes, SourceHint::Rkyv0_7), "legacy fixture migrates")?;
       ensure(
         migrated.value.logically_equals(&expected),
         "legacy fixture preserves its logical chrono value",
@@ -133,10 +141,7 @@ fn migrates_every_frozen_legacy_fixture_idempotently() -> Result<(), TestFailure
     ($file:literal, $migrate:path, $expected:expr) => {{
       let bytes = fixture($file)?;
       let expected = $expected;
-      let migrated = ensure_ok(
-        $migrate(&bytes, SourceHint::Rkyv0_7),
-        "deprecated Date fixture migrates",
-      )?;
+      let migrated = ensure_ok($migrate(&bytes, SourceHint::Rkyv0_7), "deprecated Date fixture migrates")?;
       ensure(
         migrated.value.logically_equals(&expected),
         "deprecated Date fixture preserves its logical chrono value",
@@ -156,10 +161,7 @@ fn migrates_every_frozen_legacy_fixture_idempotently() -> Result<(), TestFailure
     }};
   }
 
-  let representative_date = ensure_some(
-    NaiveDate::from_ymd_opt(2024, 2, 29),
-    "construct representative date",
-  )?;
+  let representative_date = ensure_some(NaiveDate::from_ymd_opt(2024, 2, 29), "construct representative date")?;
   let representative_time = ensure_some(
     NaiveTime::from_hms_nano_opt(12, 34, 56, 789_000_000),
     "construct representative time",
@@ -168,82 +170,40 @@ fn migrates_every_frozen_legacy_fixture_idempotently() -> Result<(), TestFailure
     NaiveTime::from_hms_nano_opt(23, 59, 59, 1_500_000_000),
     "construct leap-second time",
   )?;
-  let maximum_time = ensure_some(
-    NaiveTime::from_hms_nano_opt(23, 59, 59, 999_999_999),
-    "construct maximum time",
-  )?;
+  let maximum_time = ensure_some(NaiveTime::from_hms_nano_opt(23, 59, 59, 999_999_999), "construct maximum time")?;
   let representative_naive = NaiveDateTime::new(representative_date, representative_time);
   let leap_naive = NaiveDateTime::new(representative_date, leap_time);
-  let minimum_offset = ensure_some(
-    FixedOffset::west_opt(86_399),
-    "construct minimum fixed offset",
-  )?;
+  let minimum_offset = ensure_some(FixedOffset::west_opt(86_399), "construct minimum fixed offset")?;
   let zero_offset = ensure_some(FixedOffset::east_opt(0), "construct zero fixed offset")?;
-  let maximum_offset = ensure_some(
-    FixedOffset::east_opt(86_399),
-    "construct maximum fixed offset",
-  )?;
-  let representative_offset = ensure_some(
-    FixedOffset::east_opt(19_800),
-    "construct representative fixed offset",
-  )?;
-  let leap_offset = ensure_some(
-    FixedOffset::west_opt(18_000),
-    "construct leap-second fixed offset",
-  )?;
+  let maximum_offset = ensure_some(FixedOffset::east_opt(86_399), "construct maximum fixed offset")?;
+  let representative_offset = ensure_some(FixedOffset::east_opt(19_800), "construct representative fixed offset")?;
+  let leap_offset = ensure_some(FixedOffset::west_opt(18_000), "construct leap-second fixed offset")?;
 
   verify!("time-delta-min.bin", TimeDelta, TimeDelta::MIN);
   verify!(
     "time-delta-negative.bin",
     TimeDelta,
-    ensure_some(
-      TimeDelta::new(-2, 750_000_000),
-      "construct negative duration",
-    )?
+    ensure_some(TimeDelta::new(-2, 750_000_000), "construct negative duration",)?
   );
   verify!("time-delta-zero.bin", TimeDelta, TimeDelta::zero());
   verify!("time-delta-max.bin", TimeDelta, TimeDelta::MAX);
 
   verify!("naive-date-min.bin", NaiveDate, NaiveDate::MIN);
-  verify!(
-    "naive-date-representative.bin",
-    NaiveDate,
-    representative_date
-  );
+  verify!("naive-date-representative.bin", NaiveDate, representative_date);
   verify!("naive-date-max.bin", NaiveDate, NaiveDate::MAX);
 
   verify!("naive-time-min.bin", NaiveTime, NaiveTime::MIN);
-  verify!(
-    "naive-time-representative.bin",
-    NaiveTime,
-    representative_time
-  );
+  verify!("naive-time-representative.bin", NaiveTime, representative_time);
   verify!("naive-time-leap.bin", NaiveTime, leap_time);
   verify!("naive-time-max.bin", NaiveTime, maximum_time);
 
-  verify!(
-    "naive-datetime-min.bin",
-    NaiveDateTime,
-    NaiveDateTime::MIN
-  );
-  verify!(
-    "naive-datetime-representative.bin",
-    NaiveDateTime,
-    representative_naive
-  );
+  verify!("naive-datetime-min.bin", NaiveDateTime, NaiveDateTime::MIN);
+  verify!("naive-datetime-representative.bin", NaiveDateTime, representative_naive);
   verify!("naive-datetime-leap.bin", NaiveDateTime, leap_naive);
-  verify!(
-    "naive-datetime-max.bin",
-    NaiveDateTime,
-    NaiveDateTime::MAX
-  );
+  verify!("naive-datetime-max.bin", NaiveDateTime, NaiveDateTime::MAX);
 
   verify!("iso-week-min.bin", chrono::IsoWeek, NaiveDate::MIN.iso_week());
-  verify!(
-    "iso-week-representative.bin",
-    chrono::IsoWeek,
-    representative_date.iso_week()
-  );
+  verify!("iso-week-representative.bin", chrono::IsoWeek, representative_date.iso_week());
   verify!("iso-week-max.bin", chrono::IsoWeek, NaiveDate::MAX.iso_week());
 
   verify!("utc.bin", Utc, Utc);

@@ -506,7 +506,10 @@ impl NaiveDateTime {
   ///
   /// let d = from_ymd(2016, 7, 8);
   /// let hms = |h, m, s| d.and_hms_opt(h, m, s).unwrap();
-  /// assert_eq!(hms(3, 5, 7).checked_add_signed(TimeDelta::zero()), Some(hms(3, 5, 7)));
+  /// assert_eq!(
+  ///   hms(3, 5, 7).checked_add_signed(TimeDelta::zero()),
+  ///   Some(hms(3, 5, 7))
+  /// );
   /// assert_eq!(
   ///   hms(3, 5, 7).checked_add_signed(TimeDelta::try_seconds(1).unwrap()),
   ///   Some(hms(3, 5, 8))
@@ -608,7 +611,8 @@ impl NaiveDateTime {
   #[must_use]
   pub const fn checked_add_months(self, rhs: Months) -> Option<NaiveDateTime> {
     Some(Self {
-      date: try_opt!(self.date.checked_add_months(rhs)), time: self.time
+      date: try_opt!(self.date.checked_add_months(rhs)),
+      time: self.time,
     })
   }
 
@@ -709,7 +713,10 @@ impl NaiveDateTime {
   ///
   /// let d = from_ymd(2016, 7, 8);
   /// let hms = |h, m, s| d.and_hms_opt(h, m, s).unwrap();
-  /// assert_eq!(hms(3, 5, 7).checked_sub_signed(TimeDelta::zero()), Some(hms(3, 5, 7)));
+  /// assert_eq!(
+  ///   hms(3, 5, 7).checked_sub_signed(TimeDelta::zero()),
+  ///   Some(hms(3, 5, 7))
+  /// );
   /// assert_eq!(
   ///   hms(3, 5, 7).checked_sub_signed(TimeDelta::try_seconds(1).unwrap()),
   ///   Some(hms(3, 5, 6))
@@ -807,7 +814,8 @@ impl NaiveDateTime {
   #[must_use]
   pub const fn checked_sub_months(self, rhs: Months) -> Option<NaiveDateTime> {
     Some(Self {
-      date: try_opt!(self.date.checked_sub_months(rhs)), time: self.time
+      date: try_opt!(self.date.checked_sub_months(rhs)),
+      time: self.time,
     })
   }
 
@@ -910,8 +918,14 @@ impl NaiveDateTime {
   ///
   /// let fmt = StrftimeItems::new("%Y-%m-%d %H:%M:%S");
   /// let dt = NaiveDate::from_ymd_opt(2015, 9, 5).unwrap().and_hms_opt(23, 56, 4).unwrap();
-  /// assert_eq!(dt.format_with_items(fmt.clone()).to_string(), "2015-09-05 23:56:04");
-  /// assert_eq!(dt.format("%Y-%m-%d %H:%M:%S").to_string(), "2015-09-05 23:56:04");
+  /// assert_eq!(
+  ///   dt.format_with_items(fmt.clone()).to_string(),
+  ///   "2015-09-05 23:56:04"
+  /// );
+  /// assert_eq!(
+  ///   dt.format("%Y-%m-%d %H:%M:%S").to_string(),
+  ///   "2015-09-05 23:56:04"
+  /// );
   /// ```
   ///
   /// The resulting `DelayedFormat` can be formatted directly via the `Display` trait.
@@ -921,7 +935,10 @@ impl NaiveDateTime {
   /// # use chrono::format::strftime::StrftimeItems;
   /// # let fmt = StrftimeItems::new("%Y-%m-%d %H:%M:%S").clone();
   /// # let dt = NaiveDate::from_ymd_opt(2015, 9, 5).unwrap().and_hms_opt(23, 56, 4).unwrap();
-  /// assert_eq!(format!("{}", dt.format_with_items(fmt)), "2015-09-05 23:56:04");
+  /// assert_eq!(
+  ///   format!("{}", dt.format_with_items(fmt)),
+  ///   "2015-09-05 23:56:04"
+  /// );
   /// ```
   #[cfg(feature = "alloc")]
   #[inline]
@@ -954,8 +971,14 @@ impl NaiveDateTime {
   /// use chrono::NaiveDate;
   ///
   /// let dt = NaiveDate::from_ymd_opt(2015, 9, 5).unwrap().and_hms_opt(23, 56, 4).unwrap();
-  /// assert_eq!(dt.format("%Y-%m-%d %H:%M:%S").to_string(), "2015-09-05 23:56:04");
-  /// assert_eq!(dt.format("around %l %p on %b %-d").to_string(), "around 11 PM on Sep 5");
+  /// assert_eq!(
+  ///   dt.format("%Y-%m-%d %H:%M:%S").to_string(),
+  ///   "2015-09-05 23:56:04"
+  /// );
+  /// assert_eq!(
+  ///   dt.format("around %l %p on %b %-d").to_string(),
+  ///   "around 11 PM on Sep 5"
+  /// );
   /// ```
   ///
   /// The resulting `DelayedFormat` can be formatted directly via the `Display` trait.
@@ -963,8 +986,14 @@ impl NaiveDateTime {
   /// ```
   /// # use chrono::NaiveDate;
   /// # let dt = NaiveDate::from_ymd_opt(2015, 9, 5).unwrap().and_hms_opt(23, 56, 4).unwrap();
-  /// assert_eq!(format!("{}", dt.format("%Y-%m-%d %H:%M:%S")), "2015-09-05 23:56:04");
-  /// assert_eq!(format!("{}", dt.format("around %l %p on %b %-d")), "around 11 PM on Sep 5");
+  /// assert_eq!(
+  ///   format!("{}", dt.format("%Y-%m-%d %H:%M:%S")),
+  ///   "2015-09-05 23:56:04"
+  /// );
+  /// assert_eq!(
+  ///   format!("{}", dt.format("around %l %p on %b %-d")),
+  ///   "around 11 PM on Sep 5"
+  /// );
   /// ```
   #[cfg(feature = "alloc")]
   #[inline]
@@ -1017,12 +1046,14 @@ impl NaiveDateTime {
 
   /// The minimum possible `NaiveDateTime`.
   pub const MIN: Self = Self {
-    date: NaiveDate::MIN, time: NaiveTime::MIN
+    date: NaiveDate::MIN,
+    time: NaiveTime::MIN,
   };
 
   /// The maximum possible `NaiveDateTime`.
   pub const MAX: Self = Self {
-    date: NaiveDate::MAX, time: NaiveTime::MAX
+    date: NaiveDate::MAX,
+    time: NaiveTime::MAX,
   };
 
   /// The datetime of the Unix Epoch, 1970-01-01 00:00:00.
@@ -1773,9 +1804,18 @@ impl Timelike for NaiveDateTime {
 /// let d = from_ymd(2016, 7, 8);
 /// let hms = |h, m, s| d.and_hms_opt(h, m, s).unwrap();
 /// assert_eq!(hms(3, 5, 7) + TimeDelta::zero(), hms(3, 5, 7));
-/// assert_eq!(hms(3, 5, 7) + TimeDelta::try_seconds(1).unwrap(), hms(3, 5, 8));
-/// assert_eq!(hms(3, 5, 7) + TimeDelta::try_seconds(-1).unwrap(), hms(3, 5, 6));
-/// assert_eq!(hms(3, 5, 7) + TimeDelta::try_seconds(3600 + 60).unwrap(), hms(4, 6, 7));
+/// assert_eq!(
+///   hms(3, 5, 7) + TimeDelta::try_seconds(1).unwrap(),
+///   hms(3, 5, 8)
+/// );
+/// assert_eq!(
+///   hms(3, 5, 7) + TimeDelta::try_seconds(-1).unwrap(),
+///   hms(3, 5, 6)
+/// );
+/// assert_eq!(
+///   hms(3, 5, 7) + TimeDelta::try_seconds(3600 + 60).unwrap(),
+///   hms(4, 6, 7)
+/// );
 /// assert_eq!(
 ///   hms(3, 5, 7) + TimeDelta::try_seconds(86_400).unwrap(),
 ///   from_ymd(2016, 7, 9).and_hms_opt(3, 5, 7).unwrap()
@@ -1786,7 +1826,10 @@ impl Timelike for NaiveDateTime {
 /// );
 ///
 /// let hmsm = |h, m, s, milli| d.and_hms_milli_opt(h, m, s, milli).unwrap();
-/// assert_eq!(hmsm(3, 5, 7, 980) + TimeDelta::try_milliseconds(450).unwrap(), hmsm(3, 5, 8, 430));
+/// assert_eq!(
+///   hmsm(3, 5, 7, 980) + TimeDelta::try_milliseconds(450).unwrap(),
+///   hmsm(3, 5, 8, 430)
+/// );
 /// ```
 ///
 /// Leap seconds are handled,
@@ -1967,9 +2010,18 @@ impl Add<Months> for NaiveDateTime {
 /// let d = from_ymd(2016, 7, 8);
 /// let hms = |h, m, s| d.and_hms_opt(h, m, s).unwrap();
 /// assert_eq!(hms(3, 5, 7) - TimeDelta::zero(), hms(3, 5, 7));
-/// assert_eq!(hms(3, 5, 7) - TimeDelta::try_seconds(1).unwrap(), hms(3, 5, 6));
-/// assert_eq!(hms(3, 5, 7) - TimeDelta::try_seconds(-1).unwrap(), hms(3, 5, 8));
-/// assert_eq!(hms(3, 5, 7) - TimeDelta::try_seconds(3600 + 60).unwrap(), hms(2, 4, 7));
+/// assert_eq!(
+///   hms(3, 5, 7) - TimeDelta::try_seconds(1).unwrap(),
+///   hms(3, 5, 6)
+/// );
+/// assert_eq!(
+///   hms(3, 5, 7) - TimeDelta::try_seconds(-1).unwrap(),
+///   hms(3, 5, 8)
+/// );
+/// assert_eq!(
+///   hms(3, 5, 7) - TimeDelta::try_seconds(3600 + 60).unwrap(),
+///   hms(2, 4, 7)
+/// );
 /// assert_eq!(
 ///   hms(3, 5, 7) - TimeDelta::try_seconds(86_400).unwrap(),
 ///   from_ymd(2016, 7, 7).and_hms_opt(3, 5, 7).unwrap()
@@ -1980,7 +2032,10 @@ impl Add<Months> for NaiveDateTime {
 /// );
 ///
 /// let hmsm = |h, m, s, milli| d.and_hms_milli_opt(h, m, s, milli).unwrap();
-/// assert_eq!(hmsm(3, 5, 7, 450) - TimeDelta::try_milliseconds(670).unwrap(), hmsm(3, 5, 6, 780));
+/// assert_eq!(
+///   hmsm(3, 5, 7, 450) - TimeDelta::try_milliseconds(670).unwrap(),
+///   hmsm(3, 5, 6, 780)
+/// );
 /// ```
 ///
 /// Leap seconds are handled,

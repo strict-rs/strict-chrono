@@ -1,8 +1,9 @@
 [package]
 name = "chrono-rkyv-migrate"
 version.workspace = true
+# Pinned, not inherited: `rkyv` 0.7's `#[archive(check_bytes)]` derive expands `unsafe fn check_bytes` bodies whose raw-pointer reads and nested `CheckBytes` calls sit outside an `unsafe` block, which edition 2024 reports through `unsafe_op_in_unsafe_fn`. `bytecheck_derive` 0.6 targets edition 2021 and the `=0.7.46` legacy dependency is frozen for archive-format fidelity, so this isolated compatibility package hosts that generated code in the edition its derive was written against.
 edition = "2021"
-rust-version.workspace = true
+rust-version = { workspace = true }
 license-file.workspace = true
 authors.workspace = true
 repository.workspace = true

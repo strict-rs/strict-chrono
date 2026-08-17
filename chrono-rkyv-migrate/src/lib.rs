@@ -173,17 +173,11 @@ pub trait LegacyDecode: Sized {
   fn decode_current(bytes: &[u8]) -> Result<Self, MigrationError>
   where
     Self: rkyv::Archive,
-    Self::Archived: for<'bytes> rkyv::bytecheck::CheckBytes<
-        rkyv::api::high::HighValidator<'bytes, rancor::Error>,
-      > + rkyv::Deserialize<
-        Self,
-        rkyv::rancor::Strategy<rkyv::de::Pool, rancor::Error>,
-      >,
+    Self::Archived: for<'bytes> rkyv::bytecheck::CheckBytes<rkyv::api::high::HighValidator<'bytes, rancor::Error>>
+      + rkyv::Deserialize<Self, rkyv::rancor::Strategy<rkyv::de::Pool, rancor::Error>>,
   {
-    rkyv::from_bytes::<Self, rancor::Error>(bytes).map_err(|error| {
-      MigrationError::InvalidCurrentValue {
-        detail: error.to_string(),
-      }
+    rkyv::from_bytes::<Self, rancor::Error>(bytes).map_err(|error| MigrationError::InvalidCurrentValue {
+      detail: error.to_string()
     })
   }
 
@@ -214,35 +208,21 @@ pub trait LegacyDecode: Sized {
   feature = "legacy-64-le",
   feature = "legacy-64-be",
 ))]
-pub fn migrate<T>(
-  bytes: &[u8],
-  source_hint: SourceHint,
-) -> Result<MigratedArchive<T>, MigrationError>
+pub fn migrate<T>(bytes: &[u8], source_hint: SourceHint) -> Result<MigratedArchive<T>, MigrationError>
 where
   T: LegacyDecode
     + rkyv::Archive
     + for<'arena> rkyv::Serialize<
-      rkyv::api::high::HighSerializer<
-        rkyv::util::AlignedVec,
-        rkyv::ser::allocator::ArenaHandle<'arena>,
-        rancor::Error,
-      >,
+      rkyv::api::high::HighSerializer<rkyv::util::AlignedVec, rkyv::ser::allocator::ArenaHandle<'arena>, rancor::Error>,
     >,
-  T::Archived: for<'bytes> rkyv::bytecheck::CheckBytes<
-      rkyv::api::high::HighValidator<'bytes, rancor::Error>,
-    > + rkyv::Deserialize<
-      T,
-      rkyv::rancor::Strategy<rkyv::de::Pool, rancor::Error>,
-    >,
+  T::Archived: for<'bytes> rkyv::bytecheck::CheckBytes<rkyv::api::high::HighValidator<'bytes, rancor::Error>>
+    + rkyv::Deserialize<T, rkyv::rancor::Strategy<rkyv::de::Pool, rancor::Error>>,
 {
   let (value, detected_source) = match source_hint {
-    SourceHint::Rkyv0_7 => (
-      T::decode_legacy(bytes)?,
-      DetectedSource::Rkyv0_7,
-    ),
+    SourceHint::Rkyv0_7 => (T::decode_legacy(bytes)?, DetectedSource::Rkyv0_7),
     SourceHint::Rkyv0_8 => (
       T::decode_current(bytes).map_err(|current| MigrationError::UnreadableInput {
-        legacy: "legacy decoder was not run".to_owned(),
+        legacy:  "legacy decoder was not run".to_owned(),
         current: current.to_string(),
       })?,
       DetectedSource::Rkyv0_8,
@@ -251,15 +231,13 @@ where
       let current = T::decode_current(bytes);
       let legacy = T::decode_legacy(bytes);
       match (legacy, current) {
-        (Ok(legacy), Ok(current)) if legacy.logically_equals(&current) => {
-          (legacy, DetectedSource::Compatible)
-        }
+        (Ok(legacy), Ok(current)) if legacy.logically_equals(&current) => (legacy, DetectedSource::Compatible),
         (Ok(_), Ok(_)) => return Err(MigrationError::AmbiguousFormat),
         (Ok(legacy), Err(_)) => (legacy, DetectedSource::Rkyv0_7),
         (Err(_), Ok(current)) => (current, DetectedSource::Rkyv0_8),
         (Err(legacy), Err(current)) => {
           return Err(MigrationError::UnreadableInput {
-            legacy: legacy.to_string(),
+            legacy:  legacy.to_string(),
             current: current.to_string(),
           });
         }
@@ -267,10 +245,9 @@ where
     }
   };
 
-  let canonical_bytes =
-    rkyv::to_bytes::<rancor::Error>(&value).map_err(|error| MigrationError::CurrentEncoding {
-      detail: error.to_string(),
-    })?;
+  let canonical_bytes = rkyv::to_bytes::<rancor::Error>(&value).map_err(|error| MigrationError::CurrentEncoding {
+    detail: error.to_string(),
+  })?;
   Ok(MigratedArchive {
     value,
     canonical_bytes,
@@ -297,10 +274,7 @@ where
   reason = "this explicitly deprecated entrypoint exists only to migrate historical Date archives"
 )]
 #[deprecated(note = "migrate DateTime<Utc> or NaiveDate archives for new data")]
-pub fn migrate_date_utc(
-  bytes: &[u8],
-  source_hint: SourceHint,
-) -> Result<MigratedArchive<chrono::Date<chrono::Utc>>, MigrationError> {
+pub fn migrate_date_utc(bytes: &[u8], source_hint: SourceHint) -> Result<MigratedArchive<chrono::Date<chrono::Utc>>, MigrationError> {
   migrate(bytes, source_hint)
 }
 
@@ -347,10 +321,7 @@ pub fn migrate_date_fixed(
   reason = "this explicitly deprecated entrypoint exists only to migrate historical Date archives"
 )]
 #[deprecated(note = "migrate DateTime<Local> or NaiveDate archives for new data")]
-pub fn migrate_date_local(
-  bytes: &[u8],
-  source_hint: SourceHint,
-) -> Result<MigratedArchive<chrono::Date<chrono::Local>>, MigrationError> {
+pub fn migrate_date_local(bytes: &[u8], source_hint: SourceHint) -> Result<MigratedArchive<chrono::Date<chrono::Local>>, MigrationError> {
   migrate(bytes, source_hint)
 }
 
@@ -366,8 +337,8 @@ pub fn migrate_date_local(
 #[must_use]
 pub const fn source_format() -> ArchiveFormat {
   ArchiveFormat {
-    version: ArchiveVersion::Rkyv0_7,
-    width: selected_width(),
+    version:    ArchiveVersion::Rkyv0_7,
+    width:      selected_width(),
     endianness: selected_endianness(),
   }
 }
@@ -384,8 +355,8 @@ pub const fn source_format() -> ArchiveFormat {
 #[must_use]
 pub const fn target_format() -> ArchiveFormat {
   ArchiveFormat {
-    version: ArchiveVersion::Rkyv0_8,
-    width: selected_width(),
+    version:    ArchiveVersion::Rkyv0_8,
+    width:      selected_width(),
     endianness: Endianness::Little,
   }
 }

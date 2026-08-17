@@ -982,8 +982,14 @@ mod tests {
     let min_unix_time = -67768100567971200;
     let max_unix_time = 67767976233532799;
 
-    assert!(matches!(transition_rule_1.find_local_time_type(min_unix_time), Err(Error::OutOfRange(_))));
-    assert!(matches!(transition_rule_2.find_local_time_type(max_unix_time), Err(Error::OutOfRange(_))));
+    assert!(matches!(
+      transition_rule_1.find_local_time_type(min_unix_time),
+      Err(Error::OutOfRange(_))
+    ));
+    assert!(matches!(
+      transition_rule_2.find_local_time_type(max_unix_time),
+      Err(Error::OutOfRange(_))
+    ));
 
     Ok(())
   }

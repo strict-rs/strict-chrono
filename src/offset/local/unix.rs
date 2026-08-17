@@ -100,7 +100,9 @@ impl Default for Cache {
     let env_tz = env::var("TZ").ok();
     let env_ref = env_tz.as_deref();
     Cache {
-      last_checked: SystemTime::now(), source: Source::new(env_ref), zone: current_zone(env_ref)
+      last_checked: SystemTime::now(),
+      source:       Source::new(env_ref),
+      zone:         current_zone(env_ref),
     }
   }
 }

@@ -1,4 +1,4 @@
-schema-version = "0.2.0"
+schema-version = "0.3.2"
 
 [template]
 id = "rust-template"
@@ -9,7 +9,6 @@ url = "ssh://git@github.com/takumi-earth/rust-template.git"
 branch = "main"
 
 [ecosystems]
-order = ["cargo"]
 
 [ecosystems.cargo.features]
 canonical-profile = "rkyv"
@@ -123,9 +122,6 @@ exclude = [
 
 [ecosystems.cargo.layout]
 kind = "flat"
-
-[ecosystems.cargo.update]
-lockfile-refresh = "when-managed-dependencies-change"
 
 [update.opt-outs]
 files    = []
@@ -835,36 +831,6 @@ prune = ["target-repository", "unencountered"]
 entry-type = "cargo-deny-git-source-url"
 order = "sorted"
 
-[ecosystems.cargo.update.workspace]
-dependencies = [
-  "anstyle",
-  "bpaf",
-  "cargo_metadata",
-  "globset",
-  "ignore",
-  "parking_lot",
-  "proc-macro2",
-  "proptest",
-  "serde_json",
-  "snapbox",
-  "strict-test-support",
-  "syn",
-  "template-core",
-  "template-stask",
-  "thiserror",
-  "toml",
-  "toml_edit",
-  "trybuild",
-]
-
-[[ecosystems.cargo.update.manifests]]
-path = "stask/Cargo.toml"
-dependencies = [
-  "template-core",
-  "template-stask",
-]
-dev-dependencies = ["strict-test-support"]
-
 [guidance]
 regenerate = true
 
@@ -955,3 +921,7 @@ source          = { kind = "git", url = "https://github.com/earthlings-dev/agent
 id              = "strict-adoption"
 path            = ".agents/plugins/strict-adoption"
 source          = { kind = "git", url = "https://github.com/earthlings-dev/agentic-plugin-strict-adoption.git", branch = "main" }
+
+[repository]
+stage = "strict"
+dependency-resolution = "registry"

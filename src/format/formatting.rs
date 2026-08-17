@@ -349,17 +349,21 @@ impl<'a, I: Iterator<Item = B> + Clone, B: Borrow<Item<'a>>> DelayedFormat<I> {
         offset_format.format(w, *off)
       }
       (TimezoneOffsetDoubleColon, _, _, Some((_, off))) => {
-        let offset_format =
-          OffsetFormat {
-            precision: OffsetPrecision::Seconds, colons: Colons::Colon, allow_zulu: false, padding: Pad::Zero
-          };
+        let offset_format = OffsetFormat {
+          precision:  OffsetPrecision::Seconds,
+          colons:     Colons::Colon,
+          allow_zulu: false,
+          padding:    Pad::Zero,
+        };
         offset_format.format(w, *off)
       }
       (TimezoneOffsetTripleColon, _, _, Some((_, off))) => {
-        let offset_format =
-          OffsetFormat {
-            precision: OffsetPrecision::Hours, colons: Colons::None, allow_zulu: false, padding: Pad::Zero
-          };
+        let offset_format = OffsetFormat {
+          precision:  OffsetPrecision::Hours,
+          colons:     Colons::None,
+          allow_zulu: false,
+          padding:    Pad::Zero,
+        };
         offset_format.format(w, *off)
       }
       (RFC2822, Some(d), Some(t), Some((_, off))) => write_rfc2822(w, crate::NaiveDateTime::new(d, t), *off),
@@ -420,7 +424,11 @@ pub fn format_item(
   item: &Item<'_>,
 ) -> fmt::Result {
   DelayedFormat {
-    date: date.copied(), time: time.copied(), off: off.cloned(), items: [item].into_iter(), locale: default_locale()
+    date:   date.copied(),
+    time:   time.copied(),
+    off:    off.cloned(),
+    items:  [item].into_iter(),
+    locale: default_locale(),
   }
   .fmt(w)
 }
@@ -591,7 +599,10 @@ pub(crate) fn write_rfc3339(
   };
 
   OffsetFormat {
-    precision: OffsetPrecision::Minutes, colons: Colons::Colon, allow_zulu: use_z, padding: Pad::Zero
+    precision:  OffsetPrecision::Minutes,
+    colons:     Colons::Colon,
+    allow_zulu: use_z,
+    padding:    Pad::Zero,
   }
   .format(w, off)
 }
@@ -631,7 +642,10 @@ pub(crate) fn write_rfc2822(w: &mut (impl Write + ?Sized), dt: NaiveDateTime, of
   write_hundreds(w, sec as u8)?;
   w.write_char(' ')?;
   OffsetFormat {
-    precision: OffsetPrecision::Minutes, colons: Colons::None, allow_zulu: false, padding: Pad::Zero
+    precision:  OffsetPrecision::Minutes,
+    colons:     Colons::None,
+    allow_zulu: false,
+    padding:    Pad::Zero,
   }
   .format(w, off)
 }

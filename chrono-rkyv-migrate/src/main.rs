@@ -1,15 +1,28 @@
 //! `chrono-rkyv-migrate` command-line adapter.
 
 use std::ffi::OsString;
-use std::fs::{self, File, OpenOptions};
-use std::io::{self, Write};
-use std::path::{Path, PathBuf};
+use std::fs::File;
+use std::fs::OpenOptions;
+use std::fs::{
+  self,
+};
+use std::io::Write;
+use std::io::{
+  self,
+};
+use std::path::Path;
+use std::path::PathBuf;
 use std::process::ExitCode;
 
-use bpaf::{construct, long, OptionParser, Parser};
-use chrono_rkyv_migrate::{
-  ArchiveFormat, Endianness, MigrationError, PointerWidth, SourceHint,
-};
+use bpaf::OptionParser;
+use bpaf::Parser;
+use bpaf::construct;
+use bpaf::long;
+use chrono_rkyv_migrate::ArchiveFormat;
+use chrono_rkyv_migrate::Endianness;
+use chrono_rkyv_migrate::MigrationError;
+use chrono_rkyv_migrate::PointerWidth;
+use chrono_rkyv_migrate::SourceHint;
 
 /// Parsed `migrate` command-line surface.
 #[derive(Debug)]
@@ -89,9 +102,7 @@ fn options() -> OptionParser<Options> {
   let source_version = long("source-version")
     .help("Source archive generation: auto, 0.7, or 0.8")
     .argument::<String>("VERSION");
-  let input = long("input")
-    .help("Input archive path")
-    .argument::<PathBuf>("PATH");
+  let input = long("input").help("Input archive path").argument::<PathBuf>("PATH");
   let output = long("output")
     .help("Separate destination path")
     .argument::<PathBuf>("PATH")
@@ -121,12 +132,7 @@ fn options() -> OptionParser<Options> {
 /// Executes the parsed command.
 fn execute(options: Options) -> Result<(), CliError> {
   execute_migrate(
-    &options.archive_type,
-    &options.source_version,
-    &options.input,
-    options.output,
-    options.in_place,
-    options.replace,
+    &options.archive_type, &options.source_version, &options.input, options.output, options.in_place, options.replace,
   )
 }
 
@@ -149,9 +155,7 @@ fn execute_migrate(
       ));
     }
     (None, false) => {
-      return Err(CliError::InvalidOptions(
-        "one of `--output` or `--in-place` is required".to_owned(),
-      ));
+      return Err(CliError::InvalidOptions("one of `--output` or `--in-place` is required".to_owned()));
     }
   };
   if replace && matches!(destination, Destination::InPlace) {
@@ -168,11 +172,7 @@ fn execute_migrate(
   let canonical = migrate_direct(archive_type, &bytes, hint)?;
   let source = chrono_rkyv_migrate::source_format();
   let target = chrono_rkyv_migrate::target_format();
-  eprintln!(
-    "source mode: {}; target format: {}",
-    display_format(source),
-    display_format(target)
-  );
+  eprintln!("source mode: {}; target format: {}", display_format(source), display_format(target));
 
   match destination {
     Destination::Output(output) => write_output(&output, &canonical, replace),
@@ -197,15 +197,10 @@ fn parse_source_hint(value: &str) -> Result<SourceHint, CliError> {
   deprecated,
   reason = "the explicitly supported legacy Date CLI tokens preserve access to historical archives"
 )]
-fn migrate_direct(
-  archive_type: &str,
-  bytes: &[u8],
-  hint: SourceHint,
-) -> Result<rkyv::util::AlignedVec, MigrationError> {
+fn migrate_direct(archive_type: &str, bytes: &[u8], hint: SourceHint) -> Result<rkyv::util::AlignedVec, MigrationError> {
   macro_rules! migrate_bytes {
     ($target:ty) => {
-      chrono_rkyv_migrate::migrate::<$target>(bytes, hint)
-        .map(|migrated| migrated.canonical_bytes)
+      chrono_rkyv_migrate::migrate::<$target>(bytes, hint).map(|migrated| migrated.canonical_bytes)
     };
   }
 
@@ -253,7 +248,8 @@ fn write_output(path: &Path, bytes: &[u8], replace: bool) -> Result<(), CliError
 
 /// Writes and syncs all bytes before considering the destination successful.
 fn write_and_sync(mut file: File, path: &Path, bytes: &[u8]) -> Result<(), CliError> {
-  file.write_all(bytes)
+  file
+    .write_all(bytes)
     .and_then(|()| file.sync_all())
     .map_err(|source| CliError::Write {
       path: path.to_owned(),
@@ -264,12 +260,9 @@ fn write_and_sync(mut file: File, path: &Path, bytes: &[u8]) -> Result<(), CliEr
 /// Writes a sibling temporary file and atomically renames it over the input.
 fn replace_in_place(input: &Path, bytes: &[u8]) -> Result<(), CliError> {
   let parent = input.parent().unwrap_or_else(|| Path::new("."));
-  let file_name = input.file_name().ok_or_else(|| {
-    CliError::InvalidOptions(format!(
-      "input path `{}` has no file name",
-      input.display()
-    ))
-  })?;
+  let file_name = input
+    .file_name()
+    .ok_or_else(|| CliError::InvalidOptions(format!("input path `{}` has no file name", input.display())))?;
   let permissions = fs::metadata(input)
     .map_err(|source| CliError::Read {
       path: input.to_owned(),
@@ -316,13 +309,8 @@ fn replace_in_place(input: &Path, bytes: &[u8]) -> Result<(), CliError> {
   }
 
   Err(CliError::Write {
-    path: input.to_owned(),
-    source: last_collision.unwrap_or_else(|| {
-      io::Error::new(
-        io::ErrorKind::AlreadyExists,
-        "could not allocate a sibling temporary file",
-      )
-    }),
+    path:   input.to_owned(),
+    source: last_collision.unwrap_or_else(|| io::Error::new(io::ErrorKind::AlreadyExists, "could not allocate a sibling temporary file")),
   })
 }
 
@@ -330,10 +318,7 @@ fn replace_in_place(input: &Path, bytes: &[u8]) -> Result<(), CliError> {
 fn temporary_path(parent: &Path, file_name: &std::ffi::OsStr, attempt: u16) -> PathBuf {
   let mut temporary_name = OsString::from(".");
   temporary_name.push(file_name);
-  temporary_name.push(format!(
-    ".chrono-rkyv-migrate-{}-{attempt}.tmp",
-    std::process::id()
-  ));
+  temporary_name.push(format!(".chrono-rkyv-migrate-{}-{attempt}.tmp", std::process::id()));
   parent.join(temporary_name)
 }
 
@@ -359,13 +344,19 @@ fn display_format(format: ArchiveFormat) -> String {
 mod tests {
   use std::fs;
 
-  use super::{
-    execute_migrate, migrate_direct, options, parse_source_hint, replace_in_place,
-    write_output, CliError, SourceHint,
-  };
-  use strict_test_support::{
-    ensure, ensure_ok, TempDir, TestFailure,
-  };
+  use strict_test_support::TempDir;
+  use strict_test_support::TestFailure;
+  use strict_test_support::ensure;
+  use strict_test_support::ensure_ok;
+
+  use super::CliError;
+  use super::SourceHint;
+  use super::execute_migrate;
+  use super::migrate_direct;
+  use super::options;
+  use super::parse_source_hint;
+  use super::replace_in_place;
+  use super::write_output;
 
   #[test]
   fn parses_source_versions() -> Result<(), TestFailure> {
@@ -381,26 +372,14 @@ mod tests {
       ensure_ok(parse_source_hint("0.8"), "parse current source hint")? == SourceHint::Rkyv0_8,
       "0.8 maps to the current source",
     )?;
-    ensure(
-      parse_source_hint("1").is_err(),
-      "unknown source versions are rejected",
-    )
+    ensure(parse_source_hint("1").is_err(), "unknown source versions are rejected")
   }
 
   #[test]
   fn bpaf_parser_accepts_the_documented_migrate_surface() -> Result<(), TestFailure> {
     let parsed = match options().run_inner(&[
-        "migrate",
-        "--type",
-        "naive-date",
-        "--source-version",
-        "auto",
-        "--input",
-        "input.bin",
-        "--output",
-        "output.bin",
-        "--replace",
-      ]) {
+      "migrate", "--type", "naive-date", "--source-version", "auto", "--input", "input.bin", "--output", "output.bin", "--replace",
+    ]) {
       Ok(parsed) => parsed,
       Err(_) => {
         return Err(TestFailure::Condition {
@@ -408,18 +387,9 @@ mod tests {
         });
       }
     };
-    ensure(
-      parsed.archive_type == "naive-date",
-      "parser retains the direct chrono type",
-    )?;
-    ensure(
-      parsed.source_version == "auto",
-      "parser retains the source hint",
-    )?;
-    ensure(
-      parsed.input == std::path::Path::new("input.bin"),
-      "parser retains the input path",
-    )?;
+    ensure(parsed.archive_type == "naive-date", "parser retains the direct chrono type")?;
+    ensure(parsed.source_version == "auto", "parser retains the source hint")?;
+    ensure(parsed.input == std::path::Path::new("input.bin"), "parser retains the input path")?;
     ensure(
       parsed.output.as_deref() == Some(std::path::Path::new("output.bin")),
       "parser retains the output path",
@@ -446,28 +416,14 @@ mod tests {
     )?;
     ensure(
       matches!(
-        execute_migrate(
-          "month",
-          "0.8",
-          std::path::Path::new("missing.bin"),
-          None,
-          false,
-          false,
-        ),
+        execute_migrate("month", "0.8", std::path::Path::new("missing.bin"), None, false, false,),
         Err(CliError::InvalidOptions(_))
       ),
       "one destination is required",
     )?;
     ensure(
       matches!(
-        execute_migrate(
-          "month",
-          "0.8",
-          std::path::Path::new("missing.bin"),
-          None,
-          true,
-          true,
-        ),
+        execute_migrate("month", "0.8", std::path::Path::new("missing.bin"), None, true, true,),
         Err(CliError::InvalidOptions(_))
       ),
       "replace is rejected for in-place mode",
@@ -481,24 +437,12 @@ mod tests {
     fs::write(&output, b"old")?;
 
     ensure(
-      matches!(
-      write_output(&output, b"new", false),
-      Err(CliError::Write { .. })
-      ),
+      matches!(write_output(&output, b"new", false), Err(CliError::Write { .. })),
       "create-new output refuses an existing path",
     )?;
-    ensure(
-      fs::read(&output)? == b"old",
-      "replacement refusal preserves existing bytes",
-    )?;
-    ensure_ok(
-      write_output(&output, b"new", true),
-      "explicitly replace output",
-    )?;
-    ensure(
-      fs::read(&output)? == b"new",
-      "explicit replacement writes new bytes",
-    )
+    ensure(fs::read(&output)? == b"old", "replacement refusal preserves existing bytes")?;
+    ensure_ok(write_output(&output, b"new", true), "explicitly replace output")?;
+    ensure(fs::read(&output)? == b"new", "explicit replacement writes new bytes")
   }
 
   #[test]
@@ -507,10 +451,7 @@ mod tests {
     let input = directory.path().join("archive.bin");
     fs::write(&input, b"old")?;
 
-    ensure_ok(
-      replace_in_place(&input, b"canonical"),
-      "replace archive in place",
-    )?;
+    ensure_ok(replace_in_place(&input, b"canonical"), "replace archive in place")?;
     ensure(
       fs::read(&input)? == b"canonical",
       "in-place replacement writes complete canonical bytes",
@@ -522,10 +463,7 @@ mod tests {
     let directory = TempDir::new("chrono-rkyv-migrate-command")?;
     let input = directory.path().join("legacy.bin");
     let output = directory.path().join("current.bin");
-    let current = ensure_ok(
-      rkyv::to_bytes::<rancor::Error>(&chrono::Month::March),
-      "encode current month input",
-    )?;
+    let current = ensure_ok(rkyv::to_bytes::<rancor::Error>(&chrono::Month::March), "encode current month input")?;
     fs::write(&input, current)?;
 
     ensure_ok(
@@ -537,10 +475,7 @@ mod tests {
       rkyv::from_bytes::<chrono::Month, rancor::Error>(&migrated),
       "decode CLI output as current month",
     )?;
-    ensure(
-      decoded == chrono::Month::March,
-      "CLI output preserves the direct chrono value",
-    )
+    ensure(decoded == chrono::Month::March, "CLI output preserves the direct chrono value")
   }
 
   #[test]
@@ -557,10 +492,7 @@ mod tests {
       ),
       "invalid archive fails before in-place replacement",
     )?;
-    ensure(
-      fs::read(&input)? == original,
-      "failed migration preserves the original input",
-    )?;
+    ensure(fs::read(&input)? == original, "failed migration preserves the original input")?;
     ensure(
       fs::read_dir(directory.path())?.count() == 1,
       "failed migration leaves no sibling temporary file",

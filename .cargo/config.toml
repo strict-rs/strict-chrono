@@ -1,0 +1,35 @@
+# Cargo config for this workspace.
+#
+# Aliases here become `cargo <alias>` subcommands usable anywhere inside the
+# workspace. Toolchain switches (`+nightly`) cannot live in aliases — put those
+# in the justfile.
+
+[alias]
+# Repository-specific extensions live in the `stask` crate. `cargo stask x`
+# expands to `cargo run --package stask --quiet -- x`; standard workflows use
+# the installed `template` binary instead.
+stask   = ["run", "--package", "stask", "--quiet", "--"]
+
+# Low-level Cargo primitives retained for direct diagnostic use.
+xtest   = ["test",   "--workspace", "--all-targets", "--all-features"]
+xcheck  = ["check",  "--workspace", "--all-targets", "--all-features", "--locked"]
+xclippy = ["clippy", "--workspace", "--all-targets", "--all-features"]
+xdoc    = ["doc",    "--workspace", "--all-features", "--no-deps"]
+xbuild  = ["build",  "--workspace", "--all-targets", "--all-features", "--release"]
+
+[build]
+# Shared compiler flags for every workspace compilation.
+rustflags = ["--cfg=tokio_unstable"]
+
+[term]
+verbose = false
+color   = "auto"
+
+# Future-expansion examples (commented; uncomment and edit as needed):
+#
+# [target.x86_64-unknown-linux-gnu]
+# linker = "clang"
+# rustflags = ["-C", "link-arg=-fuse-ld=mold"]
+#
+# [registries.crates-io]
+# protocol = "sparse"

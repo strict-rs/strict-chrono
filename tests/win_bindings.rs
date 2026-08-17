@@ -10,16 +10,13 @@ fn gen_bindings() {
     "--out",
     BINDINGS,
     "--flat",
-    "--no-comment",
-    "--no-deps",
     "--sys",
     "--filter",
     "GetTimeZoneInformationForYear",
     "SystemTimeToFileTime",
     "SystemTimeToTzSpecificLocalTime",
     "TzSpecificLocalTimeToSystemTime",
-  ])
-  .unwrap();
+  ]);
 
   // Check the output is the same as before.
   // Depending on the git configuration the file may have been checked out with `\r\n` newlines or
