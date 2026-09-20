@@ -1,18 +1,44 @@
 //! Public migration API and downstream extension-seam tests.
 
+#![cfg(any(
+  feature = "legacy-16-le",
+  feature = "legacy-16-be",
+  feature = "legacy-32-le",
+  feature = "legacy-32-be",
+  feature = "legacy-64-le",
+  feature = "legacy-64-be",
+))]
+
 use core::fmt;
 
 use chrono_rkyv_migrate::DetectedSource;
 use chrono_rkyv_migrate::LegacyDecode;
+use chrono_rkyv_migrate::MigratedArchive;
 use chrono_rkyv_migrate::MigrationError;
 use chrono_rkyv_migrate::SourceHint;
 use chrono_rkyv_migrate::migrate;
 use rancor::Fallible;
 use rancor::Source;
-use strict_test_support::TestFailure;
+use strict_test_support::ConditionFailure;
+use strict_test_support::PredicateFailure;
+use strict_test_support::ResultFailure;
 use strict_test_support::ensure;
-use strict_test_support::ensure_contains;
 use strict_test_support::ensure_ok;
+use strict_test_support::ensure_that;
+
+/// Native failures from constructing and checking migration API results.
+#[derive(Debug, thiserror::Error)]
+enum ApiTestFailure {
+  /// An API expectation did not hold.
+  #[error(transparent)]
+  Condition(#[from] ConditionFailure),
+  /// A synthetic current archive could not be serialized.
+  #[error(transparent)]
+  Archive(#[from] ResultFailure<rancor::Error>),
+  /// A migration unexpectedly failed.
+  #[error(transparent)]
+  Migration(#[from] ResultFailure<MigrationError>),
+}
 
 /// Synthetic current archive used to deterministically exercise auto-detection.
 #[derive(Debug, PartialEq, rkyv::Archive, rkyv::Deserialize, rkyv::Serialize)]
@@ -98,7 +124,7 @@ impl LegacyDecode for EncodingFailure {
 }
 
 /// Serializes one valid current synthetic archive.
-fn current_bytes(marker: u8, value: i32) -> Result<rkyv::util::AlignedVec, TestFailure> {
+fn current_bytes(marker: u8, value: i32) -> Result<rkyv::util::AlignedVec, ResultFailure<rancor::Error>> {
   ensure_ok(
     rkyv::to_bytes::<rancor::Error>(&Synthetic {
       marker,
@@ -109,7 +135,7 @@ fn current_bytes(marker: u8, value: i32) -> Result<rkyv::util::AlignedVec, TestF
 }
 
 #[test]
-fn auto_detects_legacy_only_input() -> Result<(), TestFailure> {
+fn auto_detects_legacy_only_input() -> Result<(), ApiTestFailure> {
   let migrated = ensure_ok(
     migrate::<Synthetic>(&[0xa5], SourceHint::Auto),
     "migrate legacy-only synthetic archive",
@@ -124,11 +150,12 @@ fn auto_detects_legacy_only_input() -> Result<(), TestFailure> {
   ensure(
     migrated.detected_source == DetectedSource::Rkyv0_7,
     "legacy-only input reports rkyv 0.7",
-  )
+  )?;
+  Ok(())
 }
 
 #[test]
-fn auto_detects_current_only_input() -> Result<(), TestFailure> {
+fn auto_detects_current_only_input() -> Result<(), ApiTestFailure> {
   let bytes = current_bytes(2, 7)?;
   let migrated = ensure_ok(
     migrate::<Synthetic>(&bytes, SourceHint::Auto),
@@ -144,11 +171,12 @@ fn auto_detects_current_only_input() -> Result<(), TestFailure> {
   ensure(
     migrated.detected_source == DetectedSource::Rkyv0_8,
     "current-only input reports rkyv 0.8",
-  )
+  )?;
+  Ok(())
 }
 
 #[test]
-fn auto_reports_compatible_dual_valid_input() -> Result<(), TestFailure> {
+fn auto_reports_compatible_dual_valid_input() -> Result<(), ApiTestFailure> {
   let bytes = current_bytes(0, 7)?;
   let migrated = ensure_ok(migrate::<Synthetic>(&bytes, SourceHint::Auto), "migrate dual-valid equal archive")?;
   ensure(
@@ -161,48 +189,42 @@ fn auto_reports_compatible_dual_valid_input() -> Result<(), TestFailure> {
   ensure(
     migrated.detected_source == DetectedSource::Compatible,
     "dual-valid equal input reports compatibility",
-  )
+  )?;
+  Ok(())
 }
 
 #[test]
-fn auto_rejects_different_dual_valid_values() -> Result<(), TestFailure> {
+fn auto_rejects_different_dual_valid_values() -> Result<(), ApiTestFailure> {
   let bytes = current_bytes(1, 7)?;
   ensure(
     matches!(migrate::<Synthetic>(&bytes, SourceHint::Auto), Err(MigrationError::AmbiguousFormat)),
     "dual-valid different input is never guessed",
+  )?;
+  Ok(())
+}
+
+#[test]
+fn auto_retains_both_unreadable_stages() -> Result<(), PredicateFailure<Result<MigratedArchive<Synthetic>, MigrationError>>> {
+  ensure_that(
+    migrate::<Synthetic>(&[], SourceHint::Auto),
+    "empty input reports both unreadable decoder stages and retains both failures",
+    |result| {
+      matches!(result, Err(MigrationError::UnreadableInput { legacy, current })
+      if legacy.contains("synthetic legacy marker") && !current.is_empty())
+    },
   )
+  .map(drop)
 }
 
 #[test]
-fn auto_retains_both_unreadable_stages() -> Result<(), TestFailure> {
-  let error = match migrate::<Synthetic>(&[], SourceHint::Auto) {
-    Err(MigrationError::UnreadableInput {
-      legacy,
-      current,
-    }) => (legacy, current),
-    Ok(_) | Err(_) => {
-      return Err(TestFailure::Condition {
-        context: "empty input reports both unreadable decoder stages",
-      });
-    }
-  };
-  ensure_contains(&error.0, "synthetic legacy marker", "unreadable input retains the legacy failure")?;
-  ensure(!error.1.is_empty(), "unreadable input retains the current failure")
-}
-
-#[test]
-fn reports_current_format_encoding_failure() -> Result<(), TestFailure> {
-  let error = migrate::<EncodingFailure>(&[0x5a], SourceHint::Rkyv0_7);
-  match error {
-    Err(MigrationError::CurrentEncoding {
-      detail,
-    }) => ensure_contains(
-      &detail,
-      "deliberate current encoding failure",
-      "encoding failure retains the serializer diagnostic",
-    ),
-    Ok(_) | Err(_) => Err(TestFailure::Condition {
-      context: "legacy success followed by serialization failure reports current encoding",
-    }),
-  }
+fn reports_current_format_encoding_failure() -> Result<(), PredicateFailure<Result<MigratedArchive<EncodingFailure>, MigrationError>>> {
+  ensure_that(
+    migrate::<EncodingFailure>(&[0x5a], SourceHint::Rkyv0_7),
+    "legacy success followed by serialization failure reports current encoding and retains the serializer diagnostic",
+    |result| {
+      matches!(result, Err(MigrationError::CurrentEncoding { detail })
+      if detail.contains("deliberate current encoding failure"))
+    },
+  )
+  .map(drop)
 }

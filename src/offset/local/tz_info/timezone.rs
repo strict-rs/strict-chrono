@@ -242,8 +242,8 @@ impl<'a> TimeZoneRef<'a> {
     let local_leap_time = local_time.and_utc().timestamp();
 
     // if we have at least one transition,
-    // we must check _all_ of them, in case of any Overlapping (MappedLocalTime::Ambiguous) or Skipping
-    // (MappedLocalTime::None) transitions
+    // we must check _all_ of them, in case of any Overlapping (MappedLocalTime::Ambiguous) or
+    // Skipping (MappedLocalTime::None) transitions
     let offset_after_last = if !self.transitions.is_empty() {
       let mut prev = self.local_time_types[0];
 

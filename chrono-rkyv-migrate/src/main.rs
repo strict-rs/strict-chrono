@@ -344,12 +344,17 @@ fn display_format(format: ArchiveFormat) -> String {
 mod tests {
   use std::fs;
 
+  use strict_test_support::ConditionFailure;
+  use strict_test_support::PredicateFailure;
+  use strict_test_support::ResultFailure;
   use strict_test_support::TempDir;
   use strict_test_support::TestFailure;
   use strict_test_support::ensure;
   use strict_test_support::ensure_ok;
+  use strict_test_support::ensure_that;
 
   use super::CliError;
+  use super::Options;
   use super::SourceHint;
   use super::execute_migrate;
   use super::migrate_direct;
@@ -358,8 +363,28 @@ mod tests {
   use super::replace_in_place;
   use super::write_output;
 
+  /// Native assertion, fixture, and I/O failures from the CLI tests.
+  #[derive(Debug, thiserror::Error)]
+  enum CliTestFailure {
+    /// A CLI expectation did not hold.
+    #[error(transparent)]
+    Condition(#[from] ConditionFailure),
+    /// A CLI operation unexpectedly failed.
+    #[error(transparent)]
+    Command(#[from] ResultFailure<CliError>),
+    /// Current-format serialization or deserialization failed.
+    #[error(transparent)]
+    Archive(#[from] ResultFailure<rancor::Error>),
+    /// Temporary fixture creation failed.
+    #[error(transparent)]
+    Fixture(#[from] TestFailure),
+    /// A test filesystem operation failed.
+    #[error(transparent)]
+    Io(#[from] std::io::Error),
+  }
+
   #[test]
-  fn parses_source_versions() -> Result<(), TestFailure> {
+  fn parses_source_versions() -> Result<(), CliTestFailure> {
     ensure(
       ensure_ok(parse_source_hint("auto"), "parse auto source hint")? == SourceHint::Auto,
       "auto maps to automatic source detection",
@@ -372,34 +397,33 @@ mod tests {
       ensure_ok(parse_source_hint("0.8"), "parse current source hint")? == SourceHint::Rkyv0_8,
       "0.8 maps to the current source",
     )?;
-    ensure(parse_source_hint("1").is_err(), "unknown source versions are rejected")
+    ensure(parse_source_hint("1").is_err(), "unknown source versions are rejected")?;
+    Ok(())
   }
 
   #[test]
-  fn bpaf_parser_accepts_the_documented_migrate_surface() -> Result<(), TestFailure> {
-    let parsed = match options().run_inner(&[
-      "migrate", "--type", "naive-date", "--source-version", "auto", "--input", "input.bin", "--output", "output.bin", "--replace",
-    ]) {
-      Ok(parsed) => parsed,
-      Err(_) => {
-        return Err(TestFailure::Condition {
-          context: "documented migrate command parses",
-        });
-      }
-    };
-    ensure(parsed.archive_type == "naive-date", "parser retains the direct chrono type")?;
-    ensure(parsed.source_version == "auto", "parser retains the source hint")?;
-    ensure(parsed.input == std::path::Path::new("input.bin"), "parser retains the input path")?;
-    ensure(
-      parsed.output.as_deref() == Some(std::path::Path::new("output.bin")),
-      "parser retains the output path",
-    )?;
-    ensure(!parsed.in_place, "output mode does not select in-place")?;
-    ensure(parsed.replace, "parser retains explicit replacement")
+  fn bpaf_parser_accepts_the_documented_migrate_surface() -> Result<(), PredicateFailure<Result<Options, bpaf::ParseFailure>>> {
+    ensure_that(
+      options().run_inner(&[
+        "migrate", "--type", "naive-date", "--source-version", "auto", "--input", "input.bin", "--output", "output.bin", "--replace",
+      ]),
+      "documented migrate command parses and retains every option",
+      |result| {
+        result.as_ref().is_ok_and(|parsed| {
+          parsed.archive_type == "naive-date"
+            && parsed.source_version == "auto"
+            && parsed.input == std::path::Path::new("input.bin")
+            && parsed.output.as_deref() == Some(std::path::Path::new("output.bin"))
+            && !parsed.in_place
+            && parsed.replace
+        })
+      },
+    )
+    .map(drop)
   }
 
   #[test]
-  fn destination_selection_rejects_ambiguous_options() -> Result<(), TestFailure> {
+  fn destination_selection_rejects_ambiguous_options() -> Result<(), CliTestFailure> {
     ensure(
       matches!(
         execute_migrate(
@@ -427,11 +451,12 @@ mod tests {
         Err(CliError::InvalidOptions(_))
       ),
       "replace is rejected for in-place mode",
-    )
+    )?;
+    Ok(())
   }
 
   #[test]
-  fn separate_output_requires_explicit_replacement() -> Result<(), TestFailure> {
+  fn separate_output_requires_explicit_replacement() -> Result<(), CliTestFailure> {
     let directory = TempDir::new("chrono-rkyv-migrate-replace")?;
     let output = directory.path().join("archive.bin");
     fs::write(&output, b"old")?;
@@ -442,11 +467,12 @@ mod tests {
     )?;
     ensure(fs::read(&output)? == b"old", "replacement refusal preserves existing bytes")?;
     ensure_ok(write_output(&output, b"new", true), "explicitly replace output")?;
-    ensure(fs::read(&output)? == b"new", "explicit replacement writes new bytes")
+    ensure(fs::read(&output)? == b"new", "explicit replacement writes new bytes")?;
+    Ok(())
   }
 
   #[test]
-  fn in_place_replacement_writes_complete_new_bytes() -> Result<(), TestFailure> {
+  fn in_place_replacement_writes_complete_new_bytes() -> Result<(), CliTestFailure> {
     let directory = TempDir::new("chrono-rkyv-migrate-in-place")?;
     let input = directory.path().join("archive.bin");
     fs::write(&input, b"old")?;
@@ -455,11 +481,12 @@ mod tests {
     ensure(
       fs::read(&input)? == b"canonical",
       "in-place replacement writes complete canonical bytes",
-    )
+    )?;
+    Ok(())
   }
 
   #[test]
-  fn full_migrate_command_writes_decodable_current_bytes() -> Result<(), TestFailure> {
+  fn full_migrate_command_writes_decodable_current_bytes() -> Result<(), CliTestFailure> {
     let directory = TempDir::new("chrono-rkyv-migrate-command")?;
     let input = directory.path().join("legacy.bin");
     let output = directory.path().join("current.bin");
@@ -475,11 +502,12 @@ mod tests {
       rkyv::from_bytes::<chrono::Month, rancor::Error>(&migrated),
       "decode CLI output as current month",
     )?;
-    ensure(decoded == chrono::Month::March, "CLI output preserves the direct chrono value")
+    ensure(decoded == chrono::Month::March, "CLI output preserves the direct chrono value")?;
+    Ok(())
   }
 
   #[test]
-  fn failed_validation_preserves_in_place_input() -> Result<(), TestFailure> {
+  fn failed_validation_preserves_in_place_input() -> Result<(), CliTestFailure> {
     let directory = TempDir::new("chrono-rkyv-migrate-preserve")?;
     let input = directory.path().join("archive.bin");
     let original = [u8::MAX];
@@ -496,11 +524,12 @@ mod tests {
     ensure(
       fs::read_dir(directory.path())?.count() == 1,
       "failed migration leaves no sibling temporary file",
-    )
+    )?;
+    Ok(())
   }
 
   #[test]
-  fn unsupported_application_root_type_is_typed() -> Result<(), TestFailure> {
+  fn unsupported_application_root_type_is_typed() -> Result<(), ConditionFailure> {
     ensure(
       matches!(
         migrate_direct("application-container", &[], SourceHint::Auto),
@@ -508,5 +537,6 @@ mod tests {
       ),
       "application-owned schemas are rejected by the direct CLI",
     )
+    .map(drop)
   }
 }

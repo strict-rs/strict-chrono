@@ -1,5 +1,13 @@
 //! Frozen pre-upgrade archive compatibility tests.
 
+#![cfg(any(
+  feature = "legacy-16-le",
+  feature = "legacy-16-be",
+  feature = "legacy-32-le",
+  feature = "legacy-32-be",
+  feature = "legacy-64-le",
+  feature = "legacy-64-be",
+))]
 #![allow(
   deprecated,
   reason = "the fixture suite verifies the explicitly deprecated Date migration entrypoints"
@@ -24,6 +32,7 @@ use chrono::Weekday;
 use chrono_rkyv_migrate::DetectedSource;
 use chrono_rkyv_migrate::Endianness;
 use chrono_rkyv_migrate::LegacyDecode;
+use chrono_rkyv_migrate::MigrationError;
 use chrono_rkyv_migrate::PointerWidth;
 use chrono_rkyv_migrate::SourceHint;
 use chrono_rkyv_migrate::migrate;
@@ -32,12 +41,52 @@ use chrono_rkyv_migrate::migrate_date_local;
 use chrono_rkyv_migrate::migrate_date_utc;
 use chrono_rkyv_migrate::source_format;
 use chrono_rkyv_migrate::target_format;
+use strict_test_support::ComparisonFailure;
+use strict_test_support::ConditionFailure;
+use strict_test_support::OptionFailure;
+use strict_test_support::ResultFailure;
+use strict_test_support::SubstringFailure;
 use strict_test_support::TestFailure;
 use strict_test_support::ensure;
 use strict_test_support::ensure_contains;
 use strict_test_support::ensure_eq;
 use strict_test_support::ensure_ok;
 use strict_test_support::ensure_some;
+
+/// Native failures from loading, constructing, and checking frozen fixtures.
+#[derive(Debug, thiserror::Error)]
+enum FixtureTestFailure {
+  /// A fixture expectation did not hold.
+  #[error(transparent)]
+  Condition(#[from] ConditionFailure),
+  /// A manifest count differed from its expected value.
+  #[error(transparent)]
+  Count(#[from] ComparisonFailure<usize, usize>),
+  /// A manifest omitted required provenance.
+  #[error(transparent)]
+  Provenance(#[from] SubstringFailure<String, String>),
+  /// A frozen archive could not be migrated.
+  #[error(transparent)]
+  Migration(#[from] ResultFailure<MigrationError>),
+  /// A fixture could not be loaded.
+  #[error(transparent)]
+  Fixture(#[from] TestFailure),
+  /// The fixture manifest could not be read.
+  #[error(transparent)]
+  Io(#[from] std::io::Error),
+  /// A representative date could not be constructed.
+  #[error(transparent)]
+  Date(#[from] OptionFailure<NaiveDate>),
+  /// A representative time could not be constructed.
+  #[error(transparent)]
+  Time(#[from] OptionFailure<NaiveTime>),
+  /// A representative offset could not be constructed.
+  #[error(transparent)]
+  Offset(#[from] OptionFailure<FixedOffset>),
+  /// A representative duration could not be constructed.
+  #[error(transparent)]
+  Duration(#[from] OptionFailure<TimeDelta>),
+}
 
 /// Exact source revision used to produce the checked-in legacy bytes.
 const PRODUCER_REVISION: &str = "cc3ba6e0a512101df43b31a8f5bd230a7695c01b";
@@ -65,21 +114,21 @@ fn fixture(name: &str) -> Result<Vec<u8>, TestFailure> {
 }
 
 #[test]
-fn fixture_manifest_records_exact_provenance() -> Result<(), TestFailure> {
+fn fixture_manifest_records_exact_provenance() -> Result<(), FixtureTestFailure> {
   let manifest = fs::read_to_string(fixture_root().join("manifest.toml"))?;
-  ensure_contains(
-    &manifest,
-    &format!("producer-revision = \"{PRODUCER_REVISION}\""),
+  let (manifest, _) = ensure_contains(
+    manifest,
+    format!("producer-revision = \"{PRODUCER_REVISION}\""),
     "manifest records the exact pre-upgrade source revision",
   )?;
-  ensure_contains(
-    &manifest,
-    "rkyv-version = \"0.7.46\"",
+  let (manifest, _) = ensure_contains(
+    manifest,
+    "rkyv-version = \"0.7.46\"".to_owned(),
     "manifest records the exact legacy rkyv release",
   )?;
-  ensure_contains(
-    &manifest,
-    &format!("pointer-width = {:?}", match source_format().width {
+  let (manifest, _) = ensure_contains(
+    manifest,
+    format!("pointer-width = {:?}", match source_format().width {
       PointerWidth::Bits16 => 16,
       PointerWidth::Bits32 => 32,
       PointerWidth::Bits64 => 64,
@@ -90,21 +139,26 @@ fn fixture_manifest_records_exact_provenance() -> Result<(), TestFailure> {
     Endianness::Little => "endianness = \"little\"",
     Endianness::Big => "endianness = \"big\"",
   };
-  ensure_contains(&manifest, expected_endianness, "manifest records the selected legacy endianness")?;
+  let (manifest, _) = ensure_contains(
+    manifest,
+    expected_endianness.to_owned(),
+    "manifest records the selected legacy endianness",
+  )?;
   ensure_eq(
-    &manifest.matches("[[fixtures]]").count(),
-    &48_usize,
+    manifest.matches("[[fixtures]]").count(),
+    48_usize,
     "manifest lists every direct-type fixture",
   )?;
   ensure_eq(
-    &manifest.matches("producer-kind = \"frozen-pre-upgrade-date-layout\"").count(),
-    &9_usize,
+    manifest.matches("producer-kind = \"frozen-pre-upgrade-date-layout\"").count(),
+    9_usize,
     "manifest identifies every frozen deprecated Date fixture",
-  )
+  )?;
+  Ok(())
 }
 
 #[test]
-fn migrates_every_frozen_legacy_fixture_idempotently() -> Result<(), TestFailure> {
+fn migrates_every_frozen_legacy_fixture_idempotently() -> Result<(), FixtureTestFailure> {
   macro_rules! verify {
     ($file:literal, $target:ty, $expected:expr) => {{
       let bytes = fixture($file)?;

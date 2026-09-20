@@ -95,8 +95,8 @@ fn parse_rfc2822<'a>(parsed: &mut Parsed, mut s: &'a str) -> ParseResult<(&'a st
   //
   // - we do not recognize a folding white space (FWS) or comment (CFWS). for our purposes, instead,
   //   we accept any sequence of Unicode white space characters (denoted here to `S`). For comments,
-  //   we accept any text within parentheses while respecting escaped parentheses. Any actual RFC 2822
-  //   parser is expected to parse FWS and/or CFWS themselves and replace it with a single SP
+  //   we accept any text within parentheses while respecting escaped parentheses. Any actual RFC
+  //   2822 parser is expected to parse FWS and/or CFWS themselves and replace it with a single SP
   //   (`%x20`); this is legitimate.
   //
   // - two-digit year < 50 should be interpreted by adding 2000. two-digit year >= 50 or three-digit
@@ -105,9 +105,9 @@ fn parse_rfc2822<'a>(parsed: &mut Parsed, mut s: &'a str) -> ParseResult<(&'a st
   //
   // - mismatching day-of-week is always an error, which is consistent to Chrono's own rules.
   //
-  // - zones can range from `-9959` to `+9959`, but `FixedOffset` does not support offsets larger than
-  //   24 hours. this is not *that* problematic since we do not directly go to a `DateTime` so one can
-  //   recover the offset information from `Parsed` anyway.
+  // - zones can range from `-9959` to `+9959`, but `FixedOffset` does not support offsets larger
+  //   than 24 hours. this is not *that* problematic since we do not directly go to a `DateTime` so
+  //   one can recover the offset information from `Parsed` anyway.
 
   s = s.trim_start();
 
