@@ -15,7 +15,7 @@ Exactly one source-mode feature selects the legacy pointer width and byte order:
 - `legacy-64-le`
 - `legacy-64-be`
 
-Each mode enables the matching current chrono pointer width. Output is always canonical `rkyv` `0.8` little-endian data at that width. The default feature set is `["cli", "legacy-32-le"]`. A `--no-default-features` build exposes format and error vocabulary but deliberately omits migration operations because no legacy representation is selected.
+Each mode enables the matching current chrono pointer width. Output is always canonical `rkyv` `0.8` little-endian data at that width. The default feature set is `["cli", "legacy-32-le"]`. A `--no-default-features` build exposes format and error vocabulary but deliberately omits migration operations because no legacy representation is selected. Enabling only `cli` also builds successfully; the executable exits with a diagnostic naming the required source-mode features before reading or writing any files. To build a working CLI with a nondefault format, use `--no-default-features --features cli,<legacy-mode>`.
 
 Never combine source modes in one build. Raw archives contain no chrono root-type, archive-version, width, or byte-order marker, so the caller must supply the expected type and compile the matching width/endianness mode.
 
