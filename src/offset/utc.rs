@@ -13,15 +13,6 @@ use core::fmt;
   ))
 ))]
 use std::time::SystemTime;
-#[cfg(all(
-  feature = "now",
-  not(all(
-    target_family = "wasm",
-    feature = "wasmbind",
-    not(any(target_os = "emscripten", target_os = "wasi", target_os = "linux"))
-  ))
-))]
-use std::time::UNIX_EPOCH;
 
 #[cfg(feature = "rkyv")]
 use rkyv::Archive;
@@ -40,6 +31,8 @@ use crate::Date;
 #[cfg(feature = "now")]
 #[allow(deprecated)]
 use crate::DateTime;
+#[cfg(feature = "now")]
+use crate::DateTimeConversionError;
 use crate::naive::NaiveDate;
 use crate::naive::NaiveDateTime;
 
@@ -91,6 +84,11 @@ impl Utc {
   ///
   /// [`Local::now()`]: crate::Local::now
   ///
+  /// # Panics
+  ///
+  /// Panics when the platform sample is invalid or outside Chrono's range.
+  /// Use [`Utc::try_now`] to receive the sample in a typed error instead.
+  ///
   /// # Example
   ///
   /// ```
@@ -106,29 +104,64 @@ impl Utc {
   /// let offset = FixedOffset::east_opt(5 * 60 * 60).unwrap();
   /// let now_with_offset = Utc::now().with_timezone(&offset);
   /// ```
+  #[must_use]
+  pub fn now() -> DateTime<Utc> {
+    Self::try_now().expect("current time outside Chrono's range")
+  }
+
+  /// Samples the current UTC wall time, reporting conversion failure explicitly.
+  ///
+  /// This performs a fresh platform clock read. It is not monotonic: clock
+  /// corrections can move successive samples backward. Times before the Unix
+  /// epoch are supported. Precision is limited by the platform clock.
+  ///
+  /// On native platforms this uses [`std::time::SystemTime`]. On JavaScript
+  /// WebAssembly targets with `wasmbind`, this uses a JavaScript `Date` with
+  /// millisecond precision. It does not recover failures of the host clock
+  /// acquisition itself, such as an unsupported target or a host exception.
+  ///
+  /// # Errors
+  ///
+  /// Returns [`DateTimeConversionError`] retaining the observed platform sample
+  /// when it is invalid or outside Chrono's range.
+  ///
+  /// ```
+  /// # #[cfg(feature = "now")]
+  /// # fn main() -> Result<(), chrono::DateTimeConversionError> {
+  /// let current = chrono::Utc::try_now()?;
+  /// let timestamp = current.timestamp();
+  /// # let _ = timestamp;
+  /// # Ok(())
+  /// # }
+  /// # #[cfg(not(feature = "now"))]
+  /// # fn main() {}
+  /// ```
   #[cfg(not(all(
     target_family = "wasm",
     feature = "wasmbind",
     not(any(target_os = "emscripten", target_os = "wasi", target_os = "linux"))
   )))]
-  #[must_use]
-  pub fn now() -> DateTime<Utc> {
-    let now = SystemTime::now()
-      .duration_since(UNIX_EPOCH)
-      .expect("system time before Unix epoch");
-    DateTime::from_timestamp(now.as_secs() as i64, now.subsec_nanos()).unwrap()
+  pub fn try_now() -> Result<DateTime<Utc>, DateTimeConversionError> {
+    DateTime::from_system_time(SystemTime::now())
   }
 
-  /// Returns a `DateTime` which corresponds to the current date and time.
+  /// Samples the current UTC wall time from a JavaScript `Date`.
+  ///
+  /// The sample has millisecond precision and may move backward after a clock
+  /// correction. Times before the Unix epoch are supported. Host exceptions
+  /// during acquisition are not converted to Rust errors.
+  ///
+  /// # Errors
+  ///
+  /// Returns [`DateTimeConversionError::JsDate`] retaining the sample and its
+  /// observed milliseconds if it is invalid or outside Chrono's range.
   #[cfg(all(
     target_family = "wasm",
     feature = "wasmbind",
     not(any(target_os = "emscripten", target_os = "wasi", target_os = "linux"))
   ))]
-  #[must_use]
-  pub fn now() -> DateTime<Utc> {
-    let now = js_sys::Date::new_0();
-    DateTime::<Utc>::from(now)
+  pub fn try_now() -> Result<DateTime<Utc>, DateTimeConversionError> {
+    DateTime::from_js_date(js_sys::Date::new_0())
   }
 }
 

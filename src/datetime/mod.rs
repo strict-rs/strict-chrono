@@ -3,6 +3,15 @@
 
 //! ISO 8601 date and time with time zone.
 
+#[cfg(any(
+  feature = "std",
+  all(
+    target_family = "wasm",
+    feature = "wasmbind",
+    not(any(target_os = "emscripten", target_os = "wasi", target_os = "linux"))
+  )
+))]
+mod clock;
 #[cfg(all(feature = "alloc", not(feature = "std"), not(test)))]
 use alloc::string::String;
 use core::borrow::Borrow;
@@ -21,6 +30,15 @@ use std::time::SystemTime;
 #[cfg(feature = "std")]
 use std::time::UNIX_EPOCH;
 
+#[cfg(any(
+  feature = "std",
+  all(
+    target_family = "wasm",
+    feature = "wasmbind",
+    not(any(target_os = "emscripten", target_os = "wasi", target_os = "linux"))
+  )
+))]
+pub use clock::DateTimeConversionError;
 #[cfg(feature = "rkyv")]
 use rkyv::Archive;
 #[cfg(feature = "rkyv")]
@@ -2005,21 +2023,12 @@ impl str::FromStr for DateTime<Local> {
 
 #[cfg(feature = "std")]
 impl From<SystemTime> for DateTime<Utc> {
+  /// # Panics
+  ///
+  /// Panics if the sample is outside Chrono's range. Use
+  /// [`DateTime::from_system_time`] to retain the sample in a typed error instead.
   fn from(t: SystemTime) -> DateTime<Utc> {
-    let (sec, nsec) = match t.duration_since(UNIX_EPOCH) {
-      Ok(dur) => (dur.as_secs() as i64, dur.subsec_nanos()),
-      Err(e) => {
-        // unlikely but should be handled
-        let dur = e.duration();
-        let (sec, nsec) = (dur.as_secs() as i64, dur.subsec_nanos());
-        if nsec == 0 {
-          (-sec, 0)
-        } else {
-          (-sec - 1, 1_000_000_000 - nsec)
-        }
-      }
-    };
-    Utc.timestamp_opt(sec, nsec).unwrap()
+    Self::from_system_time(t).expect("system time outside Chrono's range")
   }
 }
 

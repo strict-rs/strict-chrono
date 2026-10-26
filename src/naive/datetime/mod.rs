@@ -604,7 +604,7 @@ impl NaiveDateTime {
   ///     .unwrap()
   ///     .and_hms_opt(1, 0, 0)
   ///     .unwrap()
-  ///     .checked_add_months(Months::new(core::i32::MAX as u32 + 1)),
+  ///     .checked_add_months(Months::new(i32::MAX as u32 + 1)),
   ///   None
   /// );
   /// ```
@@ -807,7 +807,7 @@ impl NaiveDateTime {
   ///     .unwrap()
   ///     .and_hms_opt(1, 0, 0)
   ///     .unwrap()
-  ///     .checked_sub_months(Months::new(core::i32::MAX as u32 + 1)),
+  ///     .checked_sub_months(Months::new(i32::MAX as u32 + 1)),
   ///   None
   /// );
   /// ```

@@ -596,6 +596,15 @@ pub use date::MIN_DATE;
 
 mod datetime;
 pub use datetime::DateTime;
+#[cfg(any(
+  feature = "std",
+  all(
+    target_family = "wasm",
+    feature = "wasmbind",
+    not(any(target_os = "emscripten", target_os = "wasi", target_os = "linux"))
+  )
+))]
+pub use datetime::DateTimeConversionError;
 #[allow(deprecated)]
 #[doc(no_inline)]
 pub use datetime::MAX_DATETIME;

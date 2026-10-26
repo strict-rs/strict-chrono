@@ -1,4 +1,5 @@
 use std::fs;
+use std::process::Command;
 
 use windows_bindgen::bindgen;
 
@@ -17,6 +18,15 @@ fn gen_bindings() {
     "SystemTimeToTzSpecificLocalTime",
     "TzSpecificLocalTimeToSystemTime",
   ]);
+
+  // The generator invokes stable rustfmt, which ignores this repository's
+  // nightly formatting options. Match the canonical `just fmt` toolchain before
+  // comparing the generated artifact, so generation and formatting converge.
+  let formatting = Command::new("rustup")
+    .args(["run", "nightly", "rustfmt", BINDINGS])
+    .status()
+    .unwrap();
+  assert!(formatting.success(), "formatting generated Windows bindings failed: {formatting}");
 
   // Check the output is the same as before.
   // Depending on the git configuration the file may have been checked out with `\r\n` newlines or
